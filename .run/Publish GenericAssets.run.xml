@@ -1,0 +1,6 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish GenericAssets" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" platform="Any CPU" runtime="Portable" target_folder="$PROJECT_DIR$/Example/Plugins" target_framework="net8.0" uuid_high="2478242913942982473" uuid_low="-6260206554334718991" />
+    <method v="2" />
+  </configuration>
+</component>

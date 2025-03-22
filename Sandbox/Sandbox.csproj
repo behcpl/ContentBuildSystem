@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FreeTypeSharp" Version="3.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ContentBuildSystem\ContentBuildSystem.csproj" />
+      <ProjectReference Include="..\DefaultProcessors\DefaultProcessors.csproj" />
+      <ProjectReference Include="..\GenericAssets\GenericAssets.csproj" />
+    </ItemGroup>
+
+</Project>

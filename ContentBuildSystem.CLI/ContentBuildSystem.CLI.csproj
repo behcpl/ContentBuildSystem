@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Company>BEHC</Company>
+        <Product>ContentBuildSystem</Product>
+        <AssemblyName>cbs</AssemblyName>
+        <Version>0.1.0</Version>
+        <Authors>BEHC</Authors>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ContentBuildSystem\ContentBuildSystem.csproj" />
+    </ItemGroup>
+
+</Project>

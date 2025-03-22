@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <Version>0.1.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BEHC.SimpleTextPreprocessor" Version="1.0.1"/>
+        <PackageReference Include="CsvHelper" Version="33.0.1"/>
+        <PackageReference Include="Glslang.NET" Version="1.2.0"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2024.3.0"/>
+        <PackageReference Include="StbDxtSharp" Version="1.10.3"/>
+        <PackageReference Include="StbImageSharp" Version="2.30.15"/>
+        <PackageReference Include="StbImageWriteSharp" Version="1.16.7"/>
+        <PackageReference Include="StbRectPackSharp" Version="1.0.4"/>
+        <PackageReference Include="StbTrueTypeSharp" Version="1.26.12"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\ContentBuildSystem.Interfaces\ContentBuildSystem.Interfaces.csproj" Private="false"/>
+    </ItemGroup>
+
+</Project>
