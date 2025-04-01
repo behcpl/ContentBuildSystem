@@ -4,24 +4,27 @@ using ContentBuildSystem.Interfaces;
 
 namespace DefaultProcessors.CopyFile;
 
-// TODO: add some settings
 // force extension to lowercase?
 // rename options, regex capture (name and parent folder) and use groups for name building? 
 public class CopyFileProcessor : IItemProcessor
 {
     private readonly IProcessorContext _context;
     private readonly string _outputPath;
+    private readonly string _outputDir;
 
     public CopyFileProcessor(IProcessorContext context)
     {
         _context = context;
-        _outputPath = Path.Combine(context.OutputPath, context.ItemRelativePath, $"{context.ItemName}.{context.ItemExtension.ToLowerInvariant()}");
+        _outputDir = Path.Combine(context.OutputPath, context.ItemRelativePath);
+        _outputPath = Path.Combine(_outputDir, $"{context.ItemName}.{context.ItemExtension.ToLowerInvariant()}");
     }
 
     public bool Process(IReport? report)
     {
         try
         {
+            Directory.CreateDirectory(_outputDir);
+            
             File.Copy(_context.ItemPath, _outputPath, true);
             File.SetLastWriteTime(_outputPath, DateTime.Now);
             return true;

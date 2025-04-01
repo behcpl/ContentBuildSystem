@@ -18,16 +18,16 @@ public class ProjectBuilder
 
     private ProjectDescription? _projectDescription;
 
-    public ProjectBuilder(string? configuration, IReport report)
+    public ProjectBuilder(IReport report)
     {
         _report = report;
         _projectSerializer = new ProjectSerializer();
-        _ruleProvider = new RuleProvider(configuration, new RuleSerializer());
+        _ruleProvider = new RuleProvider(new RuleSerializer());
 
         // TODO: where to search plugins? project first then some default folder?
     }
 
-    public void LoadProject(string projectPath)
+    public void LoadProject(string projectPath, string? configuration)
     {
         _projectDescription = _projectSerializer.Deserialize(projectPath, _report);
     }

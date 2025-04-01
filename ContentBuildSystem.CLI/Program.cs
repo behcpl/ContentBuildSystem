@@ -27,9 +27,9 @@ internal static class Program
 
         IReport report = options.Verbose ? new VerboseConsoleReport() : new ConsoleReport();
         report.Info("BUILD");
-        ProjectBuilder builder = new(options.Configuration, report);
+        ProjectBuilder builder = new(report);
 
-        builder.LoadProject(projectPath);
+        builder.LoadProject(projectPath, options.Configuration);
         builder.LoadPlugins(builderOptions.ProjectPath);
 
         bool result = true;
@@ -50,7 +50,7 @@ internal static class Program
     {
         IReport report = options.Verbose ? new VerboseConsoleReport() : new ConsoleReport();
         report.Info("CLEAN");
-        ProjectBuilder builder = new(null, report);
+        ProjectBuilder builder = new(report);
 
         string projectPath = Path.GetFullPath(options.FileName!);
         ContentBuilderOptions builderOptions = ContentBuilderOptions.Default(projectPath);
@@ -73,12 +73,12 @@ internal static class Program
         // byte[] buff = new byte[16];
 
         IReport report = options.Verbose ? new VerboseConsoleReport() : new ConsoleReport();
-        ProjectBuilder builder = new(options.Configuration, report);
+        ProjectBuilder builder = new(report);
 
         string projectPath = Path.GetFullPath(options.FileName!);
         ContentBuilderOptions builderOptions = ContentBuilderOptions.Default(projectPath);
 
-        builder.LoadProject(projectPath);
+        builder.LoadProject(projectPath, options.Configuration);
         builder.LoadPlugins(builderOptions.ProjectPath);
 
         using ProjectMonitor monitor = new ProjectMonitor(builder, builderOptions);

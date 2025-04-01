@@ -9,15 +9,13 @@ namespace ContentBuildSystem.Rules;
 
 public class RuleProvider
 {
-    private readonly string? _configuration;
     private readonly RuleSerializer _serializer;
     private readonly Dictionary<string, Rule> _rules;
     private readonly Dictionary<string, ProcessorDesc> _processors;
     private readonly HashSet<string> _missing;
 
-    public RuleProvider(string? configuration, RuleSerializer serializer)
+    public RuleProvider(RuleSerializer serializer)
     {
-        _configuration = configuration;
         _serializer = serializer;
         _rules = new Dictionary<string, Rule>();
         _processors = new Dictionary<string, ProcessorDesc>();
@@ -88,25 +86,16 @@ public class RuleProvider
             header.FolderPattern ??= baseRule.Header.FolderPattern;
         }
 
+        // TODO: apply base settings from base rule
         _processors.TryGetValue(header.Handler!, out ProcessorDesc desc);
 
-        Dictionary<string, object> configurations = _serializer.GetSettings(text, desc.SettingsType);
+        object? confSettings = _serializer.GetRawSettings(text, desc.SettingsType);
 
-        object? confSettings;
-        configurations.TryGetValue("Default", out object? defSettings);
-        if (_configuration != null)
-        {
-            configurations.TryGetValue(_configuration, out confSettings);
-            defSettings ??= Activator.CreateInstance(desc.SettingsType);
-            if (defSettings != null && confSettings != null)
-            {
-                ApplyBase(confSettings, defSettings);
-            }
-        }
-        else
-        {
-            confSettings = defSettings;
-        }
+        // defSettings ??= Activator.CreateInstance(desc.SettingsType);
+        // if (defSettings != null && confSettings != null)
+        // {
+        // ApplyBase(confSettings, defSettings);
+        // }
 
         rule = new Rule(header, mostRecent, desc.Factory, confSettings);
         _rules.Add(path, rule);

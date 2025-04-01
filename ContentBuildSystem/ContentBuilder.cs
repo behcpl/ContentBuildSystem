@@ -104,7 +104,7 @@ public class ContentBuilder
         return success;
     }
 
-    private void AddItems(BuildGroup buildGroup, string groupPath, bool recursive, string[] ruleset, IReport? report)
+    private void AddItems(BuildGroup buildGroup, string groupPath, bool recursive, RulesetDescription[] ruleset, IReport? report)
     {
         
     }
@@ -149,7 +149,7 @@ public class ContentBuilder
         return success;
     }
 
-    private bool BuildPath(Context context, string groupPath, bool recursive, string[] ruleset, IReport? report)
+    private bool BuildPath(Context context, string groupPath, bool recursive, RulesetDescription[] ruleset, IReport? report)
     {
         bool success = true;
         foreach (string itemPath in Directory.EnumerateFiles(groupPath))
@@ -173,7 +173,7 @@ public class ContentBuilder
         return success;
     }
 
-    private bool BuildFile(Context context, string path, IEnumerable<string> ruleset, IReport? report)
+    private bool BuildFile(Context context, string path, RulesetDescription[] ruleset, IReport? report)
     {
         string ext = Path.GetExtension(path).TrimStart('.');
         string name = Path.GetFileNameWithoutExtension(path);
@@ -203,9 +203,9 @@ public class ContentBuilder
         context.ItemPath = path;
         context.ItemRelativePath = dir != null ? Path.GetRelativePath(context.ProjectPath, dir) : string.Empty;
 
-        foreach (string rulePath in ruleset)
+        foreach (RulesetDescription ruleDesc in ruleset)
         {
-            string fullRulePath = Path.GetFullPath(rulePath, _projectPath);
+            string fullRulePath = Path.GetFullPath(ruleDesc.Path ?? "./", _projectPath);
             _ruleProvider.GetRule(fullRulePath, out Rule rule);
 
             if (ValidRule(name, ext, parentDir, rule))

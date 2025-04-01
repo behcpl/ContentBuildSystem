@@ -7,5 +7,6 @@ namespace ContentBuildSystem.Project;
 public class ProjectDescription
 {
     public List<PluginDescription>? Plugins;
+    public ConfigurationDescription? Configuration;
     public List<GroupDescription>? ItemGroups;
 }

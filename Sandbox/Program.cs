@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using ContentBuildSystem;
+using ContentBuildSystem.Interfaces;
 using ContentBuildSystem.Json;
 using ContentBuildSystem.Project;
 using ContentBuildSystem.Rules;
@@ -18,7 +19,7 @@ class Program
     static void Main(string[] args)
     {
         string projDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Example"));
-        string projPath = Path.Combine(projDir, "example.json");
+        string projPath = Path.Combine(projDir, "example.asproj");
         Console.WriteLine($"FOUND: {File.Exists(projPath)}  {Path.GetFullPath(projPath)}");
         ProjectSerializer serializer = new ProjectSerializer();
         ProjectDescription? project = serializer.Deserialize(projPath, null);
@@ -27,8 +28,8 @@ class Program
 
         ContentBuilderOptions options = ContentBuilderOptions.Default(projPath);
 
-        string configuration = "Release";
-        RuleProvider ruleProvider = new RuleProvider(configuration, ruleSerializer);
+        string configuration = "win64-release";
+        RuleProvider ruleProvider = new RuleProvider(ruleSerializer);
 
         ruleProvider.AddProcessor("copy", new CopyFileProcessorFactory(), typeof(CopyFileSettings));
         
@@ -40,7 +41,7 @@ class Program
         ruleProvider.AddProcessor("texture", new TextureProcessorFactory(), typeof(TextureProcessorSettings));
         ruleProvider.AddProcessor("atlas", new SpriteAtlasProcessorFactory(true), typeof(SpriteAtlasProcessorSettings));
 
-        ConsoleReport report = new ConsoleReport();
+        IReport report = new VerboseConsoleReport();
         ContentBuilder builder = new ContentBuilder(options, project!, ruleProvider, new BuildItemManifestSerializer());
         bool success = builder.Build(report);
         report.Info($"DONE {success}");

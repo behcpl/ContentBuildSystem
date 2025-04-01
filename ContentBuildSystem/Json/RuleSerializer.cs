@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using ContentBuildSystem.Rules;
 
 namespace ContentBuildSystem.Json;
@@ -19,29 +18,24 @@ public class RuleSerializer
         return JsonSerializer.Deserialize<RuleHeader>(text, _options);
     }
 
-    public Dictionary<string, object> GetSettings(string text, Type settingsType)
+    public object? GetRawSettings(string text, Type settingsType)
     {
         Type descType = typeof(RuleSettings<>).MakeGenericType(settingsType);
-        object? result = JsonSerializer.Deserialize(text, descType, _options);
+        IRuleSettings? result = JsonSerializer.Deserialize(text, descType, _options) as IRuleSettings;
 
-        return (Dictionary<string, object>)GetType().GetMethod(nameof(Convert), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(settingsType).Invoke(null, new object[] { result! })!;
+        return result?.RawSettings;
     }
 
-    private static Dictionary<string, object> Convert<T>(object parameter) where T : class
+    private interface IRuleSettings
     {
-        RuleSettings<T> ruleSettings = (RuleSettings<T>)parameter;
-        Dictionary<string, object> newDict = new Dictionary<string, object>();
-
-        foreach (var kv in ruleSettings.Settings)
-        {
-            newDict.Add(kv.Key, kv.Value);
-        }
-
-        return newDict;
+        object? RawSettings { get; }
     }
 
-    private class RuleSettings<T> where T : class
+    [Serializable]
+    private class RuleSettings<T> : IRuleSettings where T : class
     {
-        public Dictionary<string, T>? Settings;
+        [JsonIgnore] public object? RawSettings => Settings;
+
+        public T? Settings;
     }
 }
