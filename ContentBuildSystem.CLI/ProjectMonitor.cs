@@ -8,6 +8,7 @@ public class ProjectMonitor : IDisposable
 {
     private readonly ProjectBuilder _builder;
     private readonly ContentBuilderOptions _options;
+    private readonly string _configuration;
     private object _lock;
     private bool _rebuild;
     private DateTime _rebuildTime;
@@ -15,10 +16,11 @@ public class ProjectMonitor : IDisposable
 
     private readonly List<FileSystemWatcher> _watchers;
 
-    public ProjectMonitor(ProjectBuilder builder, ContentBuilderOptions options)
+    public ProjectMonitor(ProjectBuilder builder, ContentBuilderOptions options, string configuration)
     {
         _builder = builder;
         _options = options;
+        _configuration = configuration;
 
         _lock = new object();
         _watchers = new List<FileSystemWatcher>();
@@ -64,7 +66,7 @@ public class ProjectMonitor : IDisposable
         }
 
         Console.WriteLine("REBUILDING....");
-        _builder.Build(_options);
+        _builder.Build(_options, _configuration);
     }
 
     private void OnError(object sender, ErrorEventArgs e)

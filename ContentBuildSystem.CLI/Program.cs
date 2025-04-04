@@ -29,7 +29,7 @@ internal static class Program
         report.Info("BUILD");
         ProjectBuilder builder = new(report);
 
-        builder.LoadProject(projectPath, options.Configuration);
+        builder.LoadProject(projectPath);
         builder.LoadPlugins(builderOptions.ProjectPath);
 
         bool result = true;
@@ -40,7 +40,7 @@ internal static class Program
 
         if (result)
         {
-            result = builder.Build(builderOptions);
+            result = builder.Build(builderOptions, options.Configuration);
         }
 
         return HandleResult(result);
@@ -78,10 +78,10 @@ internal static class Program
         string projectPath = Path.GetFullPath(options.FileName!);
         ContentBuilderOptions builderOptions = ContentBuilderOptions.Default(projectPath);
 
-        builder.LoadProject(projectPath, options.Configuration);
+        builder.LoadProject(projectPath);
         builder.LoadPlugins(builderOptions.ProjectPath);
 
-        using ProjectMonitor monitor = new ProjectMonitor(builder, builderOptions);
+        using ProjectMonitor monitor = new ProjectMonitor(builder, builderOptions, options.Configuration ?? "default");
 
         while (running)
         {

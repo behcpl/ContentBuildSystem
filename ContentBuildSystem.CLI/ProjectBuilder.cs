@@ -27,7 +27,7 @@ public class ProjectBuilder
         // TODO: where to search plugins? project first then some default folder?
     }
 
-    public void LoadProject(string projectPath, string? configuration)
+    public void LoadProject(string projectPath)
     {
         _projectDescription = _projectSerializer.Deserialize(projectPath, _report);
     }
@@ -47,11 +47,14 @@ public class ProjectBuilder
         }
     }
 
-    public bool Build(ContentBuilderOptions builderOptions)
+    public bool Build(ContentBuilderOptions builderOptions, string? configuration)
     {
         ContentBuilder contentBuilder = new ContentBuilder(builderOptions, _projectDescription!, _ruleProvider, new BuildItemManifestSerializer());
 
-        return contentBuilder.Build(_report);
+        if (!contentBuilder.PrepareConfiguration(configuration, _report))
+            return false;
+        
+        return contentBuilder.BuildGroups(_report);
     }
 
     public bool Clean(ContentBuilderOptions builderOptions)

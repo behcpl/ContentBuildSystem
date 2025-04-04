@@ -7,7 +7,7 @@ public class VerboseConsoleReport : IReport
 {
     public void BeginGroup(string groupName, int expectedCount)
     {
-        Console.WriteLine($"GROUP: {groupName}");
+        Console.WriteLine($"GROUP: {groupName}[{expectedCount}]");
     }
 
     public void GroupItem(string itemName)

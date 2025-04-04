@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using ContentBuildSystem.Interfaces;
 using ContentBuildSystem.Project;
 using ContentBuildSystem.Rules;
@@ -43,7 +44,7 @@ public class ContentBuilder
     private readonly BuildItemManifestSerializer _itemManifestSerializer;
 
     private readonly List<BuildGroup> _groups;
-    
+
     private readonly string _projectPath;
     private readonly string _tempPath;
     private readonly string _outputPath;
@@ -52,14 +53,21 @@ public class ContentBuilder
     private readonly bool _ignoreEmptyFolderNames;
     private readonly bool _ignoreHiddenAttribute;
 
+    private readonly ConfigurationHandler _configurationHandler;
+
+    private readonly HashSet<string> _consumedFiles;
+
     public ContentBuilder(ContentBuilderOptions options, ProjectDescription project, RuleProvider ruleProvider, BuildItemManifestSerializer itemManifestSerializer)
     {
         _project = project;
         _ruleProvider = ruleProvider;
         _itemManifestSerializer = itemManifestSerializer;
-        
+
         _groups = new List<BuildGroup>();
-        
+        _consumedFiles = new HashSet<string>();
+
+        _configurationHandler = new ConfigurationHandler();
+
         _projectPath = options.ProjectPath;
         _tempPath = options.TempPath;
         _outputPath = options.OutputPath;
@@ -69,6 +77,11 @@ public class ContentBuilder
         _ignoreHiddenAttribute = options.IgnoreHiddenAttribute;
     }
 
+    public bool PrepareConfiguration(string? activeConfiguration, IReport? report)
+    {
+        return _configurationHandler.Prepare(_project.Configuration, activeConfiguration, report);
+    }
+
     public bool BuildGroups(IReport? report)
     {
         if (_project.ItemGroups == null)
@@ -76,7 +89,7 @@ public class ContentBuilder
             report?.Error("No 'ItemGroups' defined!");
             return false;
         }
-       
+
         bool success = true;
         foreach (GroupDescription groupDesc in _project.ItemGroups)
         {
@@ -94,71 +107,58 @@ public class ContentBuilder
                 continue;
             }
 
-            BuildGroup buildGroup = new BuildGroup();
-            AddItems(buildGroup, Path.GetFullPath(groupDesc.Path, _projectPath), groupDesc.Recursive, groupDesc.Ruleset, report);
-            _groups.Add(buildGroup);
-
-            // success = BuildPath(context, Path.GetFullPath(groupDesc.Path, _projectPath), groupDesc.Recursive, groupDesc.Ruleset, report) && success;
+            success = BuildGroup(groupDesc, report) && success;
         }
+
+        return success;
+    }
+
+    private bool BuildGroup(GroupDescription groupDesc, IReport? report)
+    {
+        BuildGroup buildGroup = new BuildGroup();
+        AddItems(buildGroup, Path.GetFullPath(groupDesc.Path!, _projectPath), groupDesc.Recursive, groupDesc.Ruleset!, report);
+        _groups.Add(buildGroup);
+
+        report?.BeginGroup(groupDesc.Description ?? "path", buildGroup.Items.Count);
+
+        Context context = new()
+        {
+            OutputPath = _outputPath,
+            ProjectPath = _projectPath,
+            TempPath = _tempPath,
+            GroupPath = groupDesc.Path!,
+        };
+        
+        bool success = true;
+        foreach (BuildGroup.ItemType item in buildGroup.Items)
+        {
+            string ext = Path.GetExtension(item.Path).TrimStart('.');
+            string name = Path.GetFileNameWithoutExtension(item.Path);
+            string? dir = Path.GetDirectoryName(item.Path);
+ 
+            context.ItemName = name;
+            context.ItemExtension = ext;
+            context.ItemPath = item.Path;
+            context.ItemRelativePath = dir != null ? Path.GetRelativePath(context.ProjectPath, dir) : string.Empty;
+
+            report?.GroupItem(name);
+            success = ProcessItem(context, item.Rule, report) && success;
+        }
+
+        report?.EndGroup();
 
         return success;
     }
 
     private void AddItems(BuildGroup buildGroup, string groupPath, bool recursive, RulesetDescription[] ruleset, IReport? report)
     {
-        
-    }
-    
-    public bool Build(IReport? report)
-    {
-        if (_project.ItemGroups == null)
-        {
-            report?.Error("No 'ItemGroups' defined!");
-            return false;
-        }
-
-        bool success = true;
-        foreach (GroupDescription group in _project.ItemGroups)
-        {
-            if (group.Path == null)
-            {
-                report?.Error("No 'ItemGroups' defined!");
-                success = false;
-                continue;
-            }
-
-            if (group.Ruleset == null || group.Ruleset.Length == 0)
-            {
-                report?.Error("Missing 'Ruleset'!");
-                success = false;
-                continue;
-            }
-
-            Context context = new()
-            {
-                OutputPath = _outputPath,
-                ProjectPath = _projectPath,
-                TempPath = _tempPath,
-
-                GroupPath = group.Path,
-            };
-
-            success = BuildPath(context, Path.GetFullPath(group.Path, _projectPath), group.Recursive, group.Ruleset, report) && success;
-        }
-
-        return success;
-    }
-
-    private bool BuildPath(Context context, string groupPath, bool recursive, RulesetDescription[] ruleset, IReport? report)
-    {
-        bool success = true;
         foreach (string itemPath in Directory.EnumerateFiles(groupPath))
         {
-            success = BuildFile(context, itemPath, ruleset, report) && success;
+            TryAddItem(buildGroup, itemPath, ruleset, report);
         }
 
         if (!recursive)
-            return success;
+            return;
 
         foreach (string subGroupPath in Directory.EnumerateDirectories(groupPath))
         {
@@ -167,17 +167,21 @@ public class ContentBuilder
             if (_ignoreEmptyFolderNames && dirInfo.Name.StartsWith('.'))
                 continue;
 
-            BuildPath(context, subGroupPath, recursive, ruleset, report);
+            AddItems(buildGroup, subGroupPath, recursive, ruleset, report);
         }
-
-        return success;
     }
 
-    private bool BuildFile(Context context, string path, RulesetDescription[] ruleset, IReport? report)
+    private void TryAddItem(BuildGroup buildGroup, string itemPath, RulesetDescription[] ruleset, IReport? report)
     {
-        string ext = Path.GetExtension(path).TrimStart('.');
-        string name = Path.GetFileNameWithoutExtension(path);
-        string? dir = Path.GetDirectoryName(path);
+        if (_consumedFiles.Contains(itemPath))
+        {
+            report?.Info($"SKIP {itemPath}");
+            return;
+        }
+
+        string ext = Path.GetExtension(itemPath).TrimStart('.');
+        string name = Path.GetFileNameWithoutExtension(itemPath);
+        string? dir = Path.GetDirectoryName(itemPath);
         string parentDir = string.Empty;
         if (dir != null)
         {
@@ -185,37 +189,35 @@ public class ContentBuilder
             parentDir = dirInfo.Name;
         }
 
-        FileInfo fileInfo = new FileInfo(path);
+        FileInfo fileInfo = new FileInfo(itemPath);
         if (_ignoreHiddenAttribute && (fileInfo.Attributes & FileAttributes.Hidden) != 0)
         {
-            report?.Info($"IGNORE: {path}");
-            return true;
+            report?.Info($"IGNORE: {itemPath}");
+            return;
         }
 
         if (_ignoreEmptyFileNames && string.IsNullOrEmpty(name))
         {
-            report?.Info($"IGNORE: {path}");
-            return true;
+            report?.Info($"IGNORE: {itemPath}");
+            return;
         }
-
-        context.ItemName = name;
-        context.ItemExtension = ext;
-        context.ItemPath = path;
-        context.ItemRelativePath = dir != null ? Path.GetRelativePath(context.ProjectPath, dir) : string.Empty;
 
         foreach (RulesetDescription ruleDesc in ruleset)
         {
             string fullRulePath = Path.GetFullPath(ruleDesc.Path ?? "./", _projectPath);
             _ruleProvider.GetRule(fullRulePath, out Rule rule);
 
+            if (!_configurationHandler.IsApplicable(ruleDesc.Configuration))
+                continue;
+
             if (ValidRule(name, ext, parentDir, rule))
             {
-                return ProcessItem(context, rule, report);
+                buildGroup.Items.Add(new BuildGroup.ItemType(itemPath, rule));
+                return;
             }
         }
 
-        report?.Info($"IGNORE: {path}");
-        return true;
+        report?.Info($"IGNORE: {itemPath}");
     }
 
     private bool ProcessItem(Context context, in Rule rule, IReport? report)
@@ -267,7 +269,7 @@ public class ContentBuilder
         string manifestPath = Path.Combine(context.TempPath, context.ItemRelativePath, ItemManifestName(context.ItemName));
         if (!File.Exists(manifestPath))
             return false;
-    
+
         DateTime createTime = File.GetCreationTimeUtc(context.ItemPath);
         DateTime lastWriteTime = File.GetLastWriteTimeUtc(context.ItemPath);
         DateTime mostRecent = lastWriteTime > createTime ? lastWriteTime : createTime;
@@ -275,8 +277,8 @@ public class ContentBuilder
         DateTime manifestTime = File.GetLastWriteTimeUtc(manifestPath);
         if (mostRecent > manifestTime)
             return false;
-        
-        if(!_itemManifestSerializer.Deserialize(manifestPath, out BuildItemManifest manifest))
+
+        if (!_itemManifestSerializer.Deserialize(manifestPath, out BuildItemManifest manifest))
             return false;
 
         if (manifest.Output != null)
@@ -295,7 +297,7 @@ public class ContentBuilder
             {
                 if (!File.Exists(depFilePath))
                     return false;
-   
+
                 DateTime depCreateTime = File.GetCreationTimeUtc(depFilePath);
                 DateTime depLastWriteTime = File.GetLastWriteTimeUtc(depFilePath);
                 DateTime depMostRecent = depLastWriteTime > depCreateTime ? depLastWriteTime : depCreateTime;
@@ -304,7 +306,7 @@ public class ContentBuilder
                     return false;
             }
         }
-        
+
         // TODO: what about directory dependencies?
         return true;
     }
