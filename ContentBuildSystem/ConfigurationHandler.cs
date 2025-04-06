@@ -14,7 +14,7 @@ public class ConfigurationHandler
         public string[] ValidValues;
     }
 
-    private PartType[] _parts;
+    private PartType[] _parts = [];
 
     public bool Prepare(ConfigurationDescription? cfgDesc, string? activeConfiguration, IReport? report)
     {

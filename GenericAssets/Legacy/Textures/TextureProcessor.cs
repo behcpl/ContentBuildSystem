@@ -37,7 +37,7 @@ public class TextureProcessor : IItemProcessor
 
         Directory.CreateDirectory(Path.Combine(_context.OutputPath, _context.ItemRelativePath));
 
-        TextureSource texture = textureImporter.Import(_context.ItemPath, _settings);
+        TextureSource texture = textureImporter.Import(_context.ItemPath, _settings, report);
         serializer.Serialize(texture, _outputPath);
 
         return true;

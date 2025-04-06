@@ -36,6 +36,9 @@ public class RuleSerializer
     {
         [JsonIgnore] public object? RawSettings => Settings;
 
+        // Deserialized only
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
         public T? Settings;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
     }
 }

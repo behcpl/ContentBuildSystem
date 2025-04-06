@@ -28,7 +28,7 @@ public class BitmapFontProcessor : IItemProcessor
     public bool Process(IReport? report)
     {
         TextureImporter texImporter = new TextureImporter();
-        BitmapFontImporter bmfImporter = new BitmapFontImporter(texImporter);
+        BitmapFontImporter bmfImporter = new BitmapFontImporter(texImporter, report);
         FontBinarySerializer serializer = new FontBinarySerializer();
 
         FontSource font = bmfImporter.Import(_context.ItemPath, _inputFiles);

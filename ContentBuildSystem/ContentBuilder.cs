@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using ContentBuildSystem.Interfaces;
 using ContentBuildSystem.Project;
 using ContentBuildSystem.Rules;
@@ -13,26 +12,20 @@ namespace ContentBuildSystem;
 public class ContentBuilderOptions
 {
     public string ProjectPath = string.Empty;
-    public string TempPath = string.Empty;
     public string OutputPath = string.Empty;
+    public string TempPath = string.Empty;
 
-    public bool IgnoreEmptyFileNames; // i.e. .gitignore, etc
-    public bool IgnoreEmptyFolderNames; // i.e. .git, etc
-    public bool IgnoreHiddenAttribute;
-
-    public static ContentBuilderOptions Default(string projectFilePath)
+    public static ContentBuilderOptions Build(string projectFilePath, string? outputPath, string? tempPath)
     {
         string dir = Path.GetDirectoryName(projectFilePath)!;
-
+        string output = outputPath != null && Path.IsPathRooted(outputPath) ? Path.GetFullPath(outputPath) : Path.GetFullPath(outputPath ?? "../Output", dir);
+        string temp = tempPath != null && Path.IsPathRooted(tempPath) ? Path.GetFullPath(tempPath) : Path.GetFullPath(tempPath ?? "../Temp", dir);
+        
         return new ContentBuilderOptions
         {
             ProjectPath = Path.GetFullPath(dir),
-            TempPath = Path.GetFullPath("../Temp", dir),
-            OutputPath = Path.GetFullPath("../Output", dir),
-
-            IgnoreEmptyFileNames = true,
-            IgnoreEmptyFolderNames = true,
-            IgnoreHiddenAttribute = true
+            OutputPath = output,
+            TempPath = temp,
         };
     }
 }
@@ -46,12 +39,8 @@ public class ContentBuilder
     private readonly List<BuildGroup> _groups;
 
     private readonly string _projectPath;
-    private readonly string _tempPath;
     private readonly string _outputPath;
-
-    private readonly bool _ignoreEmptyFileNames;
-    private readonly bool _ignoreEmptyFolderNames;
-    private readonly bool _ignoreHiddenAttribute;
+    private readonly string _tempPath;
 
     private readonly ConfigurationHandler _configurationHandler;
 
@@ -69,12 +58,8 @@ public class ContentBuilder
         _configurationHandler = new ConfigurationHandler();
 
         _projectPath = options.ProjectPath;
-        _tempPath = options.TempPath;
         _outputPath = options.OutputPath;
-
-        _ignoreEmptyFileNames = options.IgnoreEmptyFileNames;
-        _ignoreEmptyFolderNames = options.IgnoreEmptyFolderNames;
-        _ignoreHiddenAttribute = options.IgnoreHiddenAttribute;
+        _tempPath = options.TempPath;
     }
 
     public bool PrepareConfiguration(string? activeConfiguration, IReport? report)
@@ -116,7 +101,7 @@ public class ContentBuilder
     private bool BuildGroup(GroupDescription groupDesc, IReport? report)
     {
         BuildGroup buildGroup = new BuildGroup();
-        AddItems(buildGroup, Path.GetFullPath(groupDesc.Path!, _projectPath), groupDesc.Recursive, groupDesc.Ruleset!, report);
+        AddItems(buildGroup, groupDesc, Path.GetFullPath(groupDesc.Path!, _projectPath), report);
         _groups.Add(buildGroup);
 
         report?.BeginGroup(groupDesc.Description ?? "path", buildGroup.Items.Count);
@@ -139,7 +124,11 @@ public class ContentBuilder
             context.ItemName = name;
             context.ItemExtension = ext;
             context.ItemPath = item.Path;
-            context.ItemRelativePath = dir != null ? Path.GetRelativePath(context.ProjectPath, dir) : string.Empty;
+            // TODO: this should be relative to GroupPath, and GroupPath can be replaced with OutputPath before building RelativePath
+            context.ItemRelativePath = dir != null && !groupDesc.Flatten ? Path.GetRelativePath(context.ProjectPath, dir) : string.Empty;
+
+            if (groupDesc.OutputPath != null)
+                context.ItemRelativePath = groupDesc.OutputPath;
 
             report?.GroupItem(name);
             success = ProcessItem(context, item.Rule, report) && success;
@@ -150,28 +139,28 @@ public class ContentBuilder
         return success;
     }
 
-    private void AddItems(BuildGroup buildGroup, string groupPath, bool recursive, RulesetDescription[] ruleset, IReport? report)
+    private void AddItems(BuildGroup buildGroup, GroupDescription desc, string groupPath, IReport? report)
     {
         foreach (string itemPath in Directory.EnumerateFiles(groupPath))
         {
-            TryAddItem(buildGroup, itemPath, ruleset, report);
+            TryAddItem(buildGroup, desc, itemPath, report);
         }
 
-        if (!recursive)
+        if (!desc.Recursive)
             return;
 
         foreach (string subGroupPath in Directory.EnumerateDirectories(groupPath))
         {
             DirectoryInfo dirInfo = new DirectoryInfo(subGroupPath);
 
-            if (_ignoreEmptyFolderNames && dirInfo.Name.StartsWith('.'))
+            if (!desc.IncludeEmptyFolderNames && dirInfo.Name.StartsWith('.'))
                 continue;
 
-            AddItems(buildGroup, subGroupPath, recursive, ruleset, report);
+            AddItems(buildGroup, desc, subGroupPath, report);
         }
     }
 
-    private void TryAddItem(BuildGroup buildGroup, string itemPath, RulesetDescription[] ruleset, IReport? report)
+    private void TryAddItem(BuildGroup buildGroup, GroupDescription desc, string itemPath, IReport? report)
     {
         if (_consumedFiles.Contains(itemPath))
         {
@@ -190,19 +179,19 @@ public class ContentBuilder
         }
 
         FileInfo fileInfo = new FileInfo(itemPath);
-        if (_ignoreHiddenAttribute && (fileInfo.Attributes & FileAttributes.Hidden) != 0)
+        if (!desc.IncludeHiddenAttribute && (fileInfo.Attributes & FileAttributes.Hidden) != 0)
         {
             report?.Info($"IGNORE: {itemPath}");
             return;
         }
 
-        if (_ignoreEmptyFileNames && string.IsNullOrEmpty(name))
+        if (!desc.IncludeEmptyFileNames && string.IsNullOrEmpty(name))
         {
             report?.Info($"IGNORE: {itemPath}");
             return;
         }
 
-        foreach (RulesetDescription ruleDesc in ruleset)
+        foreach (RulesetDescription ruleDesc in desc.Ruleset!)
         {
             string fullRulePath = Path.GetFullPath(ruleDesc.Path ?? "./", _projectPath);
             _ruleProvider.GetRule(fullRulePath, out Rule rule);

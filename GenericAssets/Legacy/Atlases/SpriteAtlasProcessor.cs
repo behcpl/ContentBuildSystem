@@ -28,12 +28,12 @@ public class SpriteAtlasProcessor : IItemProcessor
     public bool Process(IReport? report)
     {
         TextureImporter textureImporter = new TextureImporter(false);
-        SpriteAtlasBuilder spriteAtlasBuilder = new SpriteAtlasBuilder(textureImporter);
+        SpriteAtlasBuilder spriteAtlasBuilder = new SpriteAtlasBuilder(textureImporter, report);
         SpriteAtlasBinarySerializer serializer = new SpriteAtlasBinarySerializer();
 
         TextureProcessorSettings textureProcessorSettings = new TextureProcessorSettings { Compress = false };
 
-        string outPath = Path.Combine(_context.OutputPath, _context.GroupPath, $"{_context.ItemName}.bcatl");
+        string outPath = Path.Combine(_context.OutputPath, _context.ItemRelativePath, $"{_context.ItemName}.bcatl");
         _outputs.Add(outPath);
 
         SpriteAtlasSource atlas = spriteAtlasBuilder.Import(_context.ItemPath, _inputFiles, textureProcessorSettings);

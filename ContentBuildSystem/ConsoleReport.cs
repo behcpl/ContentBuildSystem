@@ -15,14 +15,14 @@ public class ConsoleReport : IReport
 
     private class GroupBar
     {
-        public string Name;
+        // public string Name;
         public int Row;
         public int Count;
         public int Total;
     }
 
     private readonly List<GroupBar> _activeGroups;
-    
+
     public ConsoleReport()
     {
         _group = string.Empty;
@@ -41,13 +41,13 @@ public class ConsoleReport : IReport
         GroupBar gb = new GroupBar();
         gb.Row = Console.CursorTop;
         gb.Total = expectedCount;
-        
-        if(groupName.Length < 30)
+
+        if (groupName.Length < 30)
             Console.Write(groupName);
-        
-        for(int i = groupName.Length; i < 30; i++)
+
+        for (int i = groupName.Length; i < 30; i++)
             Console.Write(" ");
-        
+
         DrawBar(0, expectedCount);
         Console.WriteLine();
 
@@ -59,13 +59,12 @@ public class ConsoleReport : IReport
         _barBuffer[0] = '[';
         _barBuffer[^1] = ']';
 
-        int fill = (count * _BAR_SIZE + total / 2) / total;
+        int fill = total > 0 ? (count * _BAR_SIZE + total / 2) / total : _BAR_SIZE;
         for (int i = 0; i < _BAR_SIZE; i++)
         {
             _barBuffer[i + 1] = i < fill ? '\u25a0' : ' ';
         }
 
-    
         Console.Write(_barBuffer);
     }
 
@@ -77,9 +76,9 @@ public class ConsoleReport : IReport
         Console.SetCursorPosition(30, group.Row);
         group.Count++;
         DrawBar(group.Count, group.Total);
-       
+
         Console.SetCursorPosition(left, top);
- 
+
         _item = itemName;
         _headerShown = false;
     }

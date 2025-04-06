@@ -26,7 +26,7 @@ class Program
 
         RuleSerializer ruleSerializer = new RuleSerializer();
 
-        ContentBuilderOptions options = ContentBuilderOptions.Default(projPath);
+        ContentBuilderOptions options = ContentBuilderOptions.Build(projPath, null, null);
 
         string configuration = "windows-legacy";//"windows-release";
         RuleProvider ruleProvider = new RuleProvider(ruleSerializer);
@@ -47,7 +47,7 @@ class Program
         bool success = builder.PrepareConfiguration(configuration, report) && builder.BuildGroups(report);
         report.Info($"DONE {success}");
 
-        Console.ReadKey();
+        // Console.ReadKey();
         // Stream fs = File.OpenRead(projPath);
         // JsonSerializerOptions options = new JsonSerializerOptions();
         // options.AllowTrailingCommas = true;

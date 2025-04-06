@@ -7,7 +7,12 @@ public class GroupDescription
 {
     public string? Description;
     public string? Path;
+    public string? OutputPath;
     public bool Recursive;
+    public bool Flatten;
     public RulesetDescription[]? Ruleset;
-    // TODO: flatten settings here?
+   
+    public bool IncludeEmptyFileNames; // i.e. .gitignore, etc
+    public bool IncludeEmptyFolderNames; // i.e. .git, etc
+    public bool IncludeHiddenAttribute;
 }

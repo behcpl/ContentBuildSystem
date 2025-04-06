@@ -40,31 +40,14 @@ public class SdfFontGlyphComparer : IComparer<SdfFontGlyph>
 
 public class SdfFontGenerator
 {
-    // private readonly IDeserializer _deserializer;
-
-    public SdfFontGenerator()
-    {
-        // _deserializer = new DeserializerBuilder()
-        //     .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        //     .Build();
-    }
-
     public FontSource Import(string path)
     {
         string dir = Path.GetDirectoryName(path)!;
         string name = Path.GetFileNameWithoutExtension(path);
         string metaPath = Path.Combine(dir, $"{name}.meta");
 
-        VectorFontMeta meta;
-        if (File.Exists(metaPath))
-        {
-            // meta = _deserializer.Deserialize<VectorFontMeta>(File.ReadAllText(metaPath));
-            meta = new VectorFontMeta { FontSize = 32, Characters = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890,./;'[]\\`-=~!@#$%^&*()_+{}|:\"<>?"};
-        }
-        else
-        {
-            meta = new VectorFontMeta { FontSize = 32, Characters = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890,./;'[]\\`-=~!@#$%^&*()_+{}|:\"<>?"};
-        }
+        // TODO: use fntgen file
+        VectorFontMeta meta = new VectorFontMeta { FontSize = 32, Characters = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890,./;'[]\\`-=~!@#$%^&*()_+{}|:\"<>?" };
 
         byte[] fontBytes = File.ReadAllBytes(path);
         FontSource font = new FontSource();
@@ -146,7 +129,7 @@ public class SdfFontGenerator
         Packer packer = new Packer(widthPow2 - spacing, heightPow2 - spacing);
 
         glyphs.Sort(new SdfFontGlyphComparer());
-        
+
         foreach (SdfFontGlyph fontGlyph in glyphs)
         {
             packer.PackRect(fontGlyph.Width + spacing, fontGlyph.Height + spacing, fontGlyph);

@@ -1,28 +1,21 @@
 ﻿using System;
 using System.IO;
+using ContentBuildSystem.Interfaces;
 using StbDxtSharp;
 using StbImageSharp;
-
-// using YamlDotNet.Serialization;
-// using YamlDotNet.Serialization.NamingConventions;
 
 namespace GenericAssets.Legacy.Textures;
 
 public class TextureImporter
 {
     private readonly bool _canCompress;
-    // private readonly IDeserializer _deserializer;
 
     public TextureImporter(bool canCompress = true)
     {
         _canCompress = canCompress;
-
-        // _deserializer = new DeserializerBuilder()
-        //     .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        //     .Build();
     }
 
-    public TextureSource Import(string path, TextureProcessorSettings settings)
+    public TextureSource Import(string path, TextureProcessorSettings settings, IReport? report)
     {
         using FileStream stream = File.OpenRead(path);
         ImageResult image = ImageResult.FromStream(stream);
@@ -73,7 +66,7 @@ public class TextureImporter
 
         if (settings.Compress && (image.Width % 4 != 0 || image.Height % 4 != 0))
         {
-            Console.Write("WARN: Cannot compress, invalid dimensions!");
+            report?.Warning($"Cannot compress, dimensions ({image.Width}x{image.Height}) are not divisible by 4!");
             settings.Compress = false;
         }
 

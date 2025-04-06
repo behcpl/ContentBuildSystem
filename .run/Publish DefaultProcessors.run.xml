@@ -1,6 +1,6 @@
 ﻿<component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Publish DefaultProcessors" type="DotNetFolderPublish" factoryName="Publish to folder">
-    <riderPublish configuration="Release" platform="Any CPU" runtime="Portable" target_folder="$PROJECT_DIR$/Example/Plugins" target_framework="net8.0" uuid_high="-2764194682310538479" uuid_low="-4862061681439844011" />
+    <riderPublish configuration="Release" platform="Any CPU" runtime="Portable" target_folder="$PROJECT_DIR$/cli/Plugins" target_framework="net8.0" uuid_high="-2764194682310538479" uuid_low="-4862061681439844011" />
     <method v="2" />
   </configuration>
 </component>

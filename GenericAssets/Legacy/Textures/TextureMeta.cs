@@ -50,17 +50,3 @@ public struct Point2
     public int X;
     public int Y;
 }
-
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class TextureMeta// : AssetMeta
-{
-    public bool PremultipliedAlpha;
-    public bool LinearSpace;
-    public Margin Margin;
-    public Point2 Pivot;
-
-    // transform
-    public bool PremultiplyAlpha;
-    public bool Compress;
-    public bool AddFrame;
-}

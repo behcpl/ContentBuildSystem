@@ -23,9 +23,9 @@ internal static class Program
     private static int Build(BuildOptions options)
     {
         string projectPath = Path.GetFullPath(options.FileName!);
-        ContentBuilderOptions builderOptions = ContentBuilderOptions.Default(projectPath);
+        ContentBuilderOptions builderOptions = ContentBuilderOptions.Build(projectPath, options.OutputPath, options.TempPath);
 
-        IReport report = options.Verbose ? new VerboseConsoleReport() : new ConsoleReport();
+        IReport report = options.Verbose || Console.IsOutputRedirected ? new VerboseConsoleReport() : new ConsoleReport();
         report.Info("BUILD");
         ProjectBuilder builder = new(report);
 
@@ -48,12 +48,12 @@ internal static class Program
 
     private static int Clean(CleanOptions options)
     {
-        IReport report = options.Verbose ? new VerboseConsoleReport() : new ConsoleReport();
+        IReport report = options.Verbose || Console.IsOutputRedirected ? new VerboseConsoleReport() : new ConsoleReport();
         report.Info("CLEAN");
         ProjectBuilder builder = new(report);
 
         string projectPath = Path.GetFullPath(options.FileName!);
-        ContentBuilderOptions builderOptions = ContentBuilderOptions.Default(projectPath);
+        ContentBuilderOptions builderOptions = ContentBuilderOptions.Build(projectPath, options.OutputPath, options.TempPath);
 
         bool result = builder.Clean(builderOptions);
 
@@ -72,11 +72,11 @@ internal static class Program
         // using Stream input = Console.OpenStandardInput();
         // byte[] buff = new byte[16];
 
-        IReport report = options.Verbose ? new VerboseConsoleReport() : new ConsoleReport();
+        IReport report = options.Verbose || Console.IsOutputRedirected ? new VerboseConsoleReport() : new ConsoleReport();
         ProjectBuilder builder = new(report);
 
         string projectPath = Path.GetFullPath(options.FileName!);
-        ContentBuilderOptions builderOptions = ContentBuilderOptions.Default(projectPath);
+        ContentBuilderOptions builderOptions = ContentBuilderOptions.Build(projectPath, options.OutputPath, options.TempPath);
 
         builder.LoadProject(projectPath);
         builder.LoadPlugins(builderOptions.ProjectPath);

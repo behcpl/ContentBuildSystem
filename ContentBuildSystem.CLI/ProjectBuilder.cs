@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using ContentBuildSystem.Interfaces;
 using ContentBuildSystem.Json;
 using ContentBuildSystem.Project;
@@ -32,12 +33,14 @@ public class ProjectBuilder
         _projectDescription = _projectSerializer.Deserialize(projectPath, _report);
     }
 
-    public void LoadPlugins(string pluginPath)
+    public void LoadPlugins(string projectPath)
     {
         if (_projectDescription?.Plugins == null)
             return;
-      
-        _pluginManager = new PluginManager(pluginPath);
+
+        string selfDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        
+        _pluginManager = new PluginManager(projectPath, selfDirectory, _report);
 
         foreach (PluginDescription pluginDescription in _projectDescription.Plugins)
         {

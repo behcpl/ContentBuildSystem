@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using ContentBuildSystem.Interfaces;
 using GenericAssets.Legacy.Textures;
 
 namespace GenericAssets.Legacy.Fonts;
@@ -9,10 +10,12 @@ namespace GenericAssets.Legacy.Fonts;
 public class BitmapFontImporter
 {
     private readonly TextureImporter _textureImporter;
+    private readonly IReport? _report;
 
-    public BitmapFontImporter(TextureImporter textureImporter)
+    public BitmapFontImporter(TextureImporter textureImporter, IReport? report)
     {
         _textureImporter = textureImporter;
+        _report = report;
     }
 
     public FontSource Import(string path, List<string> inputFiles)
@@ -26,7 +29,7 @@ public class BitmapFontImporter
 
         TextureProcessorSettings settings = new TextureProcessorSettings { LinearSpace = true };
 
-        fontSource.Texture = _textureImporter.Import(pageTexturePath, settings);
+        fontSource.Texture = _textureImporter.Import(pageTexturePath, settings, _report);
 
         return fontSource;
     }

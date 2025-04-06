@@ -2,68 +2,33 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Loader;
 using ContentBuildSystem.Interfaces;
 
 namespace ContentBuildSystem.CLI;
 
-public class LoadContext : AssemblyLoadContext
-{
-    private readonly AssemblyDependencyResolver _resolver;
-
-    public LoadContext(string pluginPath)
-    {
-        Console.WriteLine($"SETUP PATH {pluginPath}");
-        _resolver = new AssemblyDependencyResolver(pluginPath);
-    }
-
-    protected override Assembly? Load(AssemblyName assemblyName)
-    {
-        Console.WriteLine($"TRY LOAD {assemblyName.FullName}");
-
-        string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
-        if (assemblyPath != null)
-        {
-            Console.WriteLine($"FOUND AT {assemblyPath}");
-            return LoadFromAssemblyPath(assemblyPath);
-        }
-
-        return null;
-    }
-
-    protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
-    {
-        Console.WriteLine($"TRY LOAD UNMANAGED {unmanagedDllName}");
-
-        string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
-        if (libraryPath != null)
-        {
-            Console.WriteLine($"FOUND AT {libraryPath}");
-            return LoadUnmanagedDllFromPath(libraryPath);
-        }
-
-        return IntPtr.Zero;
-    }
-}
-
 public class PluginManager
 {
-    private readonly string _pluginsPath;
+    private readonly string _projectPath;
+    private readonly string _rootPath;
+    private readonly IReport? _report;
 
-    // private readonly LoadContext _loadContext;
-    private readonly List<IPlugin> _plugins;
-
-    public PluginManager(string pluginsPath)
+    public PluginManager(string projectPath, string rootPath, IReport? report)
     {
-        _pluginsPath = pluginsPath;
-        // _loadContext = new LoadContext(_pluginsPath);
-        _plugins = new List<IPlugin>();
+        _projectPath = projectPath;
+        _rootPath = rootPath;
+        _report = report;
     }
 
-    public IPlugin LoadPlugin(string name, Dictionary<string, object>? options)
+    public IPlugin LoadPlugin(string pluginPath, Dictionary<string, object>? options)
     {
-        string path = Path.Combine(_pluginsPath, name);
-        LoadContext context = new LoadContext(path);
+        string path = Path.Combine(_projectPath, pluginPath);
+        if(!File.Exists(path))
+            path = Path.Combine(_rootPath, pluginPath);
+     
+        if(!File.Exists(path))
+            throw new NotImplementedException($"No plugin found at path: '{pluginPath}'!");
+        
+        LoadContext context = new LoadContext(path, _report);
         Assembly assembly = context.LoadFromAssemblyPath(path);
 
         Type[] types = assembly.GetTypes();
@@ -77,7 +42,6 @@ public class PluginManager
 
             IPlugin plugin = (IPlugin)Activator.CreateInstance(type)!;
             plugin.Initialize(options);
-            _plugins.Add(plugin);
 
             // TODO: check against multiple entry points
             return plugin;
