@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using ContentBuildSystem.Interfaces;
 using GenericAssets.Legacy.Textures;
 
@@ -15,14 +14,12 @@ public class BitmapFontProcessor : IItemProcessor
     private readonly IProcessorContext _context;
 
     private string _outputPath;
-    private readonly List<string> _inputFiles;
 
     public BitmapFontProcessor(IProcessorContext context, BitmapFontProcessorSettings? settings)
     {
         _context = context;
 
         _outputPath = string.Empty;
-        _inputFiles = new List<string>();
     }
 
     public bool Process(IReport? report)
@@ -31,30 +28,25 @@ public class BitmapFontProcessor : IItemProcessor
         BitmapFontImporter bmfImporter = new BitmapFontImporter(texImporter, report);
         FontBinarySerializer serializer = new FontBinarySerializer();
 
-        FontSource font = bmfImporter.Import(_context.ItemPath, _inputFiles);
+        FontSource font = bmfImporter.Import(_context.ItemPath, _context);
 
         Directory.CreateDirectory(Path.Combine(_context.OutputPath, _context.ItemRelativePath));
-        _inputFiles.Add(_context.ItemPath);
         _outputPath = Path.GetFullPath(Path.Combine(_context.OutputPath, _context.ItemRelativePath, $"{_context.ItemName}.bcfnt"));
         serializer.Serialize(font, _outputPath);
+        _context.RegisterOutputArtifact(_outputPath);
 
         return true;
-    }
-
-    public string[] GetOutputPaths()
-    {
-        return [_outputPath];
-    }
-
-    public string[] GetDependencies()
-    {
-        return _inputFiles.ToArray();
     }
 }
 
 public class BitmapFontProcessorFactory : IItemProcessorFactory
 {
     public bool SimpleProcessor => false;
+
+    public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
+    {
+        throw new System.NotSupportedException();
+    }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)
     {

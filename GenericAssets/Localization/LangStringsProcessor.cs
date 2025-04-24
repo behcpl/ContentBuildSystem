@@ -13,12 +13,10 @@ namespace GenericAssets.Localization;
 public class LangStringsProcessor : IItemProcessor
 {
     private readonly IProcessorContext _context;
-    private readonly List<string> _outputPaths;
 
     public LangStringsProcessor(IProcessorContext context)
     {
         _context = context;
-        _outputPaths = new List<string>();
     }
 
     public bool Process(IReport? report)
@@ -63,7 +61,7 @@ public class LangStringsProcessor : IItemProcessor
         };
 
         Directory.CreateDirectory(Path.Combine(_context.OutputPath, _context.ItemRelativePath));
-        
+
         for (int i = 0; i < langCount; i++)
         {
             report?.Info($"Building {languages[i].Key}...");
@@ -71,26 +69,22 @@ public class LangStringsProcessor : IItemProcessor
 
             string outputPath = Path.Combine(_context.OutputPath, _context.ItemRelativePath, $"{languages[i].Key}.json");
             File.WriteAllText(outputPath, json, Encoding.UTF8);
-            _outputPaths.Add(outputPath);
+            
+            _context.RegisterOutputArtifact(outputPath);
         }
 
         return true;
-    }
-
-    public string[] GetOutputPaths()
-    {
-        return _outputPaths.ToArray();
-    }
-
-    public string[] GetDependencies()
-    {
-        return [];
     }
 }
 
 public class LangStringsProcessorFactory : IItemProcessorFactory
 {
     public bool SimpleProcessor => false;
+
+    public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
+    {
+        throw new System.NotSupportedException("Lang string can have multiple output artifacts!");
+    }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)
     {

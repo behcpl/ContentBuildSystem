@@ -14,15 +14,9 @@ public class SpriteAtlasProcessor : IItemProcessor
 {
     private readonly IProcessorContext _context;
 
-    private readonly List<string> _outputs;
-    private readonly List<string> _inputFiles;
-
     public SpriteAtlasProcessor(IProcessorContext context, SpriteAtlasProcessorSettings? settings, bool debugOutput)
     {
         _context = context;
-
-        _outputs = new List<string>();
-        _inputFiles = new List<string>();
     }
 
     public bool Process(IReport? report)
@@ -34,9 +28,9 @@ public class SpriteAtlasProcessor : IItemProcessor
         TextureProcessorSettings textureProcessorSettings = new TextureProcessorSettings { Compress = false };
 
         string outPath = Path.Combine(_context.OutputPath, _context.ItemRelativePath, $"{_context.ItemName}.bcatl");
-        _outputs.Add(outPath);
+        _context.RegisterOutputArtifact(outPath);
 
-        SpriteAtlasSource atlas = spriteAtlasBuilder.Import(_context.ItemPath, _inputFiles, textureProcessorSettings);
+        SpriteAtlasSource atlas = spriteAtlasBuilder.Import(_context.ItemPath, _context, textureProcessorSettings);
         serializer.Serialize(atlas, outPath);
 
         TextureDebugOutput dbgOut = new TextureDebugOutput(_context.TempPath);
@@ -44,27 +38,23 @@ public class SpriteAtlasProcessor : IItemProcessor
 
         return true;
     }
-
-    public string[] GetOutputPaths()
-    {
-        return _outputs.ToArray();
-    }
-
-    public string[] GetDependencies()
-    {
-        return _inputFiles.ToArray();
-    }
 }
 
 public class SpriteAtlasProcessorFactory : IItemProcessorFactory
 {
     private readonly bool _debugOutput;
+
     public SpriteAtlasProcessorFactory(bool debugOutput)
     {
         _debugOutput = debugOutput;
     }
 
     public bool SimpleProcessor => false;
+
+    public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
+    {
+        throw new System.NotSupportedException();
+    }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)
     {

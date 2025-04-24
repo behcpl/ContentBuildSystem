@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using ContentBuildSystem.Interfaces;
 using GenericAssets.Legacy.Textures;
@@ -36,6 +37,7 @@ public class SdfFontProcessor : IItemProcessor
         Directory.CreateDirectory(Path.Combine(_context.OutputPath, _context.ItemRelativePath));
         _inputFiles.Add(_context.ItemPath);
         _outputPath = Path.GetFullPath(Path.Combine(_context.OutputPath, _context.ItemRelativePath, $"{_context.ItemName}.bcfnt"));
+        _context.RegisterOutputArtifact(_outputPath);
         serializer.Serialize(font, _outputPath);
 
         if (_debugOutput)
@@ -45,16 +47,6 @@ public class SdfFontProcessor : IItemProcessor
         }
 
         return true;
-    }
-
-    public string[] GetOutputPaths()
-    {
-        return [_outputPath];
-    }
-
-    public string[] GetDependencies()
-    {
-        return _inputFiles.ToArray();
     }
 }
 
@@ -68,6 +60,11 @@ public class SdfFontProcessorFactory : IItemProcessorFactory
     }
 
     public bool SimpleProcessor => false;
+
+    public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
+    {
+        throw new NotSupportedException();
+    }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)
     {

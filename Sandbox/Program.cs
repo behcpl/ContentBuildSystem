@@ -31,7 +31,7 @@ class Program
         string configuration = "windows-legacy";//"windows-release";
         RuleProvider ruleProvider = new RuleProvider(ruleSerializer);
 
-        ruleProvider.AddProcessor("copy", new CopyFileProcessorFactory(), typeof(CopyFileSettings));
+        ruleProvider.AddProcessor("copy", new CopyFileProcessorFactory(), typeof(CopyFileProcessorSettings));
 
         ruleProvider.AddProcessor("csv2json", new LangStringsProcessorFactory(), typeof(object));
         ruleProvider.AddProcessor("shaders", new ShaderGroupProcessorFactory(), typeof(ShaderGroupProcessorSettings));
@@ -41,9 +41,10 @@ class Program
         ruleProvider.AddProcessor("texture", new TextureProcessorFactory(), typeof(TextureProcessorSettings));
         ruleProvider.AddProcessor("atlas", new SpriteAtlasProcessorFactory(true), typeof(SpriteAtlasProcessorSettings));
 
-        // IReport report = new VerboseConsoleReport();
-        IReport report = new ConsoleReport();
+        IReport report = new VerboseConsoleReport();
+        // IReport report = new ConsoleReport();
         ContentBuilder builder = new ContentBuilder(options, project!, ruleProvider, new BuildItemManifestSerializer());
+        
         bool success = builder.PrepareConfiguration(configuration, report) && builder.BuildGroups(report);
         report.Info($"DONE {success}");
 

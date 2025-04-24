@@ -20,7 +20,7 @@ public class ContentBuilderOptions
         string dir = Path.GetDirectoryName(projectFilePath)!;
         string output = outputPath != null && Path.IsPathRooted(outputPath) ? Path.GetFullPath(outputPath) : Path.GetFullPath(outputPath ?? "../Output", dir);
         string temp = tempPath != null && Path.IsPathRooted(tempPath) ? Path.GetFullPath(tempPath) : Path.GetFullPath(tempPath ?? "../Temp", dir);
-        
+
         return new ContentBuilderOptions
         {
             ProjectPath = Path.GetFullPath(dir),
@@ -113,14 +113,14 @@ public class ContentBuilder
             TempPath = _tempPath,
             GroupPath = groupDesc.Path!,
         };
-        
+
         bool success = true;
         foreach (BuildGroup.ItemType item in buildGroup.Items)
         {
             string ext = Path.GetExtension(item.Path).TrimStart('.');
             string name = Path.GetFileNameWithoutExtension(item.Path);
             string? dir = Path.GetDirectoryName(item.Path);
- 
+            context.Reset();
             context.ItemName = name;
             context.ItemExtension = ext;
             context.ItemPath = item.Path;
@@ -211,19 +211,24 @@ public class ContentBuilder
 
     private bool ProcessItem(Context context, in Rule rule, IReport? report)
     {
-        IItemProcessor processor = rule.ProcessorFactory.Create(context, rule.Settings);
-        bool canSkip = rule.ProcessorFactory.SimpleProcessor ? CanSkipSimple(context, processor, rule) : CanSkipComplex(context, processor, rule);
-        bool result = true;
-        if (canSkip)
+        if (rule.ProcessorFactory.SimpleProcessor && CanSkipSimple(context, rule.ProcessorFactory, rule))
         {
             report?.Info($"SKIP: {context.ItemPath}");
+            return true;
         }
-        else
+
+        IItemProcessor processor = rule.ProcessorFactory.Create(context, rule.Settings);
+        if (!rule.ProcessorFactory.SimpleProcessor && CanSkipComplex(context, processor, rule))
         {
-            report?.Info($"PROCESS: {context.ItemPath}");
-            result = processor.Process(report);
-            if (result)
-                BuildItemManifest(context, processor);
+            report?.Info($"SKIP: {context.ItemPath}");
+            return true;
+        }
+
+        report?.Info($"PROCESS: {context.ItemPath}");
+        bool result = processor.Process(report);
+        if (result && !rule.ProcessorFactory.SimpleProcessor)
+        {
+            BuildItemManifest(context, processor);
         }
 
         // ReSharper disable once SuspiciousTypeConversion.Global
@@ -233,24 +238,18 @@ public class ContentBuilder
         return result;
     }
 
-    private bool CanSkipSimple(Context context, IItemProcessor processor, in Rule rule)
+    private bool CanSkipSimple(Context context, IItemProcessorFactory processorFactory, in Rule rule)
     {
         DateTime createTime = File.GetCreationTimeUtc(context.ItemPath);
         DateTime lastWriteTime = File.GetLastWriteTimeUtc(context.ItemPath);
         DateTime mostRecent = lastWriteTime > createTime ? lastWriteTime : createTime;
 
-        string[] outputPaths = processor.GetOutputPaths();
-        foreach (string outputPath in outputPaths)
-        {
-            DateTime outCreateTime = File.GetCreationTimeUtc(outputPath);
-            DateTime outLastWriteTime = File.GetLastWriteTimeUtc(outputPath);
-            DateTime outMostRecent = outLastWriteTime > outCreateTime ? outLastWriteTime : outCreateTime;
+        string outputPath = processorFactory.GetDefaultOutputArtifactPath(context, rule.Settings);
+        DateTime outCreateTime = File.GetCreationTimeUtc(outputPath);
+        DateTime outLastWriteTime = File.GetLastWriteTimeUtc(outputPath);
+        DateTime outMostRecent = outLastWriteTime > outCreateTime ? outLastWriteTime : outCreateTime;
 
-            if (mostRecent > outMostRecent || rule.LastUpdateTime > outMostRecent)
-                return false;
-        }
-
-        return true;
+        return mostRecent <= outMostRecent && rule.LastUpdateTime <= outMostRecent;
     }
 
     private bool CanSkipComplex(Context context, IItemProcessor processor, in Rule rule)
@@ -267,7 +266,7 @@ public class ContentBuilder
         if (mostRecent > manifestTime)
             return false;
 
-        if (!_itemManifestSerializer.Deserialize(manifestPath, out BuildItemManifest manifest))
+        if (!_itemManifestSerializer.Deserialize(manifestPath, _projectPath, out BuildItemManifest manifest))
             return false;
 
         if (manifest.Output != null)
@@ -296,7 +295,36 @@ public class ContentBuilder
             }
         }
 
-        // TODO: what about directory dependencies?
+        if (manifest.FolderDependencies != null)
+        {
+            foreach (FolderDependency folder in manifest.FolderDependencies)
+            {
+                if (!Directory.Exists(folder.Path))
+                    return false;
+
+                string[] currentFiles = DirectoryHelper.EnumerateFiles(folder.Path, folder.Recursive, folder.Extensions);
+                if (currentFiles.Length != (folder.Dependencies?.Length ?? 0))
+                    return false;
+
+                HashSet<string> filesSet = new(folder.Dependencies ?? []);
+                foreach (string filePath in currentFiles)
+                {
+                    if (!filesSet.Contains(filePath))
+                        return false;
+                }
+
+                foreach (string filePath in currentFiles)
+                {
+                    DateTime depCreateTime = File.GetCreationTimeUtc(filePath);
+                    DateTime depLastWriteTime = File.GetLastWriteTimeUtc(filePath);
+                    DateTime depMostRecent = depLastWriteTime > depCreateTime ? depLastWriteTime : depCreateTime;
+
+                    if (depMostRecent > manifestTime)
+                        return false;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -309,10 +337,11 @@ public class ContentBuilder
 
         BuildItemManifest manifest = new()
         {
-            Output = processor.GetOutputPaths(),
-            Dependencies = processor.GetDependencies()
+            Output = context.OutputArtifacts.ToArray(),
+            Dependencies = context.SourceDependencies.ToArray(),
+            FolderDependencies = context.SourceFolderDependencies.Select(sf => new FolderDependency { Path = sf.Path, Recursive = sf.Recursive, Dependencies = sf.Files, Extensions = sf.Extensions }).ToArray()
         };
-        _itemManifestSerializer.Serialize(manifestPath, manifest);
+        _itemManifestSerializer.Serialize(manifestPath, _projectPath, manifest);
     }
 
     private string ItemManifestName(string itemName) => $"_{itemName}.txt";
@@ -352,5 +381,57 @@ public class ContentBuilder
         public string ProjectPath { get; set; } = string.Empty;
         public string OutputPath { get; set; } = string.Empty;
         public string TempPath { get; set; } = string.Empty;
+
+        public readonly List<string> SourceDependencies = [];
+        public readonly List<FolderSource> SourceFolderDependencies = [];
+
+        public readonly List<string> OutputArtifacts = [];
+        public readonly List<string> OutputDependencies = [];
+
+        public void Reset()
+        {
+            SourceDependencies.Clear();
+            SourceFolderDependencies.Clear();
+            OutputArtifacts.Clear();
+            OutputDependencies.Clear();
+        }
+
+        public void RegisterSourceDependency(string path)
+        {
+            if (SourceDependencies.Contains(path))
+                return;
+
+            SourceDependencies.Add(path);
+        }
+
+        public void RegisterSourceFolderDependency(string path, bool recursive, IReadOnlyList<string>? extensions)
+        {
+            string[] files = DirectoryHelper.EnumerateFiles(path, recursive, extensions);
+            SourceFolderDependencies.Add(new FolderSource { Path = path, Recursive = recursive, Extensions = extensions?.ToArray() ?? [], Files = files });
+        }
+
+        public void RegisterOutputArtifact(string path)
+        {
+            if (OutputArtifacts.Contains(path))
+                return;
+
+            OutputArtifacts.Add(path);
+        }
+
+        public void RegisterOutputDependency(string path)
+        {
+            if (OutputDependencies.Contains(path))
+                return;
+
+            OutputDependencies.Add(path);
+        }
+
+        public class FolderSource
+        {
+            public bool Recursive;
+            public string Path = string.Empty;
+            public string[] Extensions = [];
+            public string[] Files = [];
+        }
     }
 }

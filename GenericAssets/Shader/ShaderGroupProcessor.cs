@@ -12,11 +12,6 @@ using IReport = ContentBuildSystem.Interfaces.IReport;
 
 namespace GenericAssets.Shader;
 
-public class ShaderGroupProcessorSettings
-{
-    public Dictionary<string, int?>? GlobalDefines;
-}
-
 public class ShaderGroupProcessor : IItemProcessor
 {
     private static readonly JsonSerializerOptions _options = new()
@@ -27,18 +22,11 @@ public class ShaderGroupProcessor : IItemProcessor
     };
 
     private readonly IProcessorContext _context;
-
-    private readonly List<string> _outputFiles;
-    private readonly List<string> _sourceFiles;
-
     private readonly Regex _extractError;
 
     public ShaderGroupProcessor(IProcessorContext context)
     {
         _context = context;
-
-        _outputFiles = new List<string>();
-        _sourceFiles = new List<string>();
 
         _extractError = new Regex(@"(ERROR|WARNING): (\d+):(\d+): (.+)", RegexOptions.Singleline | RegexOptions.NonBacktracking | RegexOptions.Compiled);
 
@@ -82,19 +70,9 @@ public class ShaderGroupProcessor : IItemProcessor
 
         using FileStream output = new(outputPath, FileMode.Create);
         JsonSerializer.Serialize(output, shaderGroupResource, _options);
-        _outputFiles.Add(outputPath);
-
+        _context.RegisterOutputArtifact(outputPath);
+        
         return result;
-    }
-
-    public string[] GetOutputPaths()
-    {
-        return _outputFiles.ToArray();
-    }
-
-    public string[] GetDependencies()
-    {
-        return _sourceFiles.ToArray();
     }
 
     private bool BuildProgram(ProgramDesc programDesc, IReport? report, out ProgramItem? programItem)
@@ -116,8 +94,7 @@ public class ShaderGroupProcessor : IItemProcessor
 
         if (ProcessShader(vsSrc, vsOut, ShaderStage.Vertex, out Glslang.NET.Shader? vertexShader, report))
         {
-            AddSource(vsSrc);
-            _outputFiles.Add(vsOut);
+            _context.RegisterOutputArtifact(vsSrc);
         }
 
         string fsSrc = Path.GetFullPath(Path.Combine(itemDir, programDesc.FragmentShader!.Source!));
@@ -126,8 +103,7 @@ public class ShaderGroupProcessor : IItemProcessor
 
         if (ProcessShader(fsSrc, fsOut, ShaderStage.Fragment, out Glslang.NET.Shader? fragmentShader, report))
         {
-            AddSource(fsSrc);
-            _outputFiles.Add(fsOut);
+            _context.RegisterOutputArtifact(fsSrc);
         }
 
         bool valid = false;
@@ -163,7 +139,7 @@ public class ShaderGroupProcessor : IItemProcessor
 
     private bool ProcessShader(string srcPath, string destPath, ShaderStage stage, out Glslang.NET.Shader? shader, IReport? report)
     {
-        IncludeResolver includeResolver = new(AddSource);
+        IncludeResolver includeResolver = new(source => _context.RegisterSourceDependency(source));
 
         using FileStream file = File.OpenRead(srcPath);
         TextReader reader = new StreamReader(file);
@@ -233,14 +209,6 @@ public class ShaderGroupProcessor : IItemProcessor
         return shader;
     }
 
-    private void AddSource(string path)
-    {
-        if (_sourceFiles.Contains(path))
-            return;
-
-        _sourceFiles.Add(path);
-    }
-
     private void ParseMessages(string blob, LineNumberMapper lineNumberMapper, IReport? report)
     {
         if (report == null || string.IsNullOrWhiteSpace(blob))
@@ -287,6 +255,11 @@ public class ShaderGroupProcessor : IItemProcessor
 public class ShaderGroupProcessorFactory : IItemProcessorFactory
 {
     public bool SimpleProcessor => false;
+
+    public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
+    {
+        throw new NotSupportedException("ShaderGroupProcessorFactory can have multiple output artifacts!");
+    }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)
     {

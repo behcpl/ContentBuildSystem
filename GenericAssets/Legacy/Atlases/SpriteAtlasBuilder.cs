@@ -48,7 +48,7 @@ public class SpriteAtlasBuilder
         _options = new JsonSerializerOptions { IncludeFields = true, AllowTrailingCommas = true, };
     }
 
-    public SpriteAtlasSource Import(string path, List<string> inputFiles, TextureProcessorSettings textureProcessorSettings)
+    public SpriteAtlasSource Import(string path, IProcessorContext context, TextureProcessorSettings textureProcessorSettings)
     {
         string directoryPath = Path.GetDirectoryName(path)!;
 
@@ -57,8 +57,8 @@ public class SpriteAtlasBuilder
         Dictionary<string, SpriteExtras> spriteExtras = meta.SpriteExtras ?? new Dictionary<string, SpriteExtras>();
 
         List<SpriteAtlasTexture> textures = new List<SpriteAtlasTexture>();
-        LoadFiles(directoryPath, textures, meta.Files, inputFiles, textureProcessorSettings, spriteExtras);
-        LoadFolders(directoryPath, textures, meta.Folders, inputFiles, textureProcessorSettings, spriteExtras);
+        LoadFiles(directoryPath, textures, meta.Files, context, textureProcessorSettings, spriteExtras);
+        LoadFolders(directoryPath, textures, meta.Folders, context, textureProcessorSettings, spriteExtras);
 
         if (textures.Count == 0)
             throw new Exception($"Empty atlas: {path}");
@@ -143,7 +143,7 @@ public class SpriteAtlasBuilder
         return spriteAtlasSource;
     }
 
-    private void LoadFiles(string directoryPath, List<SpriteAtlasTexture> textures, List<string>? metaFiles, List<string> inputFiles, TextureProcessorSettings textureProcessorSettings, Dictionary<string, SpriteExtras> extras)
+    private void LoadFiles(string directoryPath, List<SpriteAtlasTexture> textures, List<string>? metaFiles, IProcessorContext context, TextureProcessorSettings textureProcessorSettings, Dictionary<string, SpriteExtras> extras)
     {
         if (metaFiles == null || metaFiles.Count == 0)
             return;
@@ -160,7 +160,7 @@ public class SpriteAtlasBuilder
                 textureSource.Margin = spriteExtras.Margin;
                 textureSource.Pivot = spriteExtras.Pivot;
                 textures.Add(new SpriteAtlasTexture { Texture = textureSource, Name = Path.GetFileNameWithoutExtension(file) });
-                inputFiles.Add(Path.GetFullPath(Path.Combine(directoryPath, file)));
+                context.RegisterSourceDependency(Path.GetFullPath(Path.Combine(directoryPath, file)));
             }
             catch (Exception e)
             {
@@ -169,10 +169,13 @@ public class SpriteAtlasBuilder
         }
     }
 
-    private void LoadFolders(string directoryPath, List<SpriteAtlasTexture> textures, List<string>? metaFolders, List<string> inputFiles, TextureProcessorSettings textureProcessorSettings, Dictionary<string, SpriteExtras> extras)
+    private void LoadFolders(string directoryPath, List<SpriteAtlasTexture> textures, List<string>? metaFolders, IProcessorContext context, TextureProcessorSettings textureProcessorSettings, Dictionary<string, SpriteExtras> extras)
     {
         if (metaFolders == null || metaFolders.Count == 0)
             return;
+
+        // TODO: get this from importer
+        string[] extensions = ["png"];
 
         foreach (string folder in metaFolders)
         {
@@ -184,28 +187,25 @@ public class SpriteAtlasBuilder
                 continue;
             }
 
-            foreach (string filePath in Directory.EnumerateFiles(folderPath))
+            context.RegisterSourceFolderDependency(folderPath, false, extensions);
+            
+            string[] filePaths = DirectoryHelper.EnumerateFiles(folderPath, false, extensions);
+            foreach (string filePath in filePaths)
             {
-                string ext = Path.GetExtension(filePath).ToLowerInvariant();
-
-                if (ext == ".png")
+                try
                 {
-                    try
-                    {
-                        string nameOnly = Path.GetFileNameWithoutExtension(filePath);
-                        extras.TryGetValue(nameOnly, out SpriteExtras? spriteExtras);
-                        spriteExtras ??= new SpriteExtras();
+                    string nameOnly = Path.GetFileNameWithoutExtension(filePath);
+                    extras.TryGetValue(nameOnly, out SpriteExtras? spriteExtras);
+                    spriteExtras ??= new SpriteExtras();
 
-                        TextureSource textureSource = _textureImporter.Import(filePath, textureProcessorSettings, _report);
-                        textureSource.Margin = spriteExtras.Margin;
-                        textureSource.Pivot = spriteExtras.Pivot;
-                        textures.Add(new SpriteAtlasTexture { Texture = textureSource, Name = Path.GetFileNameWithoutExtension(filePath) });
-                        inputFiles.Add(Path.GetFullPath(Path.Combine(filePath)));
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
+                    TextureSource textureSource = _textureImporter.Import(filePath, textureProcessorSettings, _report);
+                    textureSource.Margin = spriteExtras.Margin;
+                    textureSource.Pivot = spriteExtras.Pivot;
+                    textures.Add(new SpriteAtlasTexture { Texture = textureSource, Name = Path.GetFileNameWithoutExtension(filePath) });
+                }
+                catch (Exception e)
+                {
+                    _report?.Exception(e);
                 }
             }
         }

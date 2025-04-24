@@ -18,7 +18,7 @@ public class PluginEntrypoint : IPlugin
 
     public bool Initialize(IReadOnlyDictionary<string, object>? options)
     {
-        _descriptors.Add(new PluginDescriptor("copy", new CopyFileProcessorFactory(), typeof(CopyFileSettings)));
+        _descriptors.Add(new PluginDescriptor("copy", new CopyFileProcessorFactory(), typeof(CopyFileProcessorSettings)));
 
         return true;
     }

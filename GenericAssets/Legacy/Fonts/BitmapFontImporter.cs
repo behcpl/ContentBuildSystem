@@ -18,14 +18,14 @@ public class BitmapFontImporter
         _report = report;
     }
 
-    public FontSource Import(string path, List<string> inputFiles)
+    public FontSource Import(string path, IProcessorContext context)
     {
         FontSource fontSource = new FontSource();
         ParseBmf(fontSource, path, out string pageName);
 
         string pageTexturePath = Path.Combine(Path.GetDirectoryName(path)!, pageName);
 
-        inputFiles.Add(Path.GetFullPath(pageTexturePath));
+        context.RegisterSourceDependency(Path.GetFullPath(pageTexturePath));
 
         TextureProcessorSettings settings = new TextureProcessorSettings { LinearSpace = true };
 

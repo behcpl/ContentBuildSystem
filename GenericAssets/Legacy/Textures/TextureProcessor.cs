@@ -1,20 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using ContentBuildSystem.Interfaces;
 
 namespace GenericAssets.Legacy.Textures;
-
-[Serializable]
-public class TextureProcessorSettings
-{
-    public bool PremultipliedAlpha;
-    public bool LinearSpace;
-
-    // transform
-    public bool PremultiplyAlpha;
-    public bool Compress;
-    public bool AddFrame;
-}
 
 public class TextureProcessor : IItemProcessor
 {
@@ -27,7 +14,7 @@ public class TextureProcessor : IItemProcessor
         _context = context;
         _settings = settings ?? new TextureProcessorSettings();
 
-        _outputPath = Path.GetFullPath(Path.Combine(_context.OutputPath, _context.ItemRelativePath, $"{_context.ItemName}.bctex"));
+        _outputPath = TextureProcessorFactory.GetDefaultOutputPath(context);
     }
 
     public bool Process(IReport? report)
@@ -42,24 +29,18 @@ public class TextureProcessor : IItemProcessor
 
         return true;
     }
-
-    public string[] GetOutputPaths()
-    {
-        return [_outputPath];
-    }
-
-    public string[] GetDependencies()
-    {
-        return [];
-    }
 }
 
 public class TextureProcessorFactory : IItemProcessorFactory
 {
     public bool SimpleProcessor => true;
 
+    public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings) => GetDefaultOutputPath(context);
+
     public IItemProcessor Create(IProcessorContext context, object? settings)
     {
         return new TextureProcessor(context, settings as TextureProcessorSettings);
     }
+
+    public static string GetDefaultOutputPath(IProcessorContext context) => Path.GetFullPath(Path.Combine(context.OutputPath, context.ItemRelativePath, $"{context.ItemName}.bctex"));
 }

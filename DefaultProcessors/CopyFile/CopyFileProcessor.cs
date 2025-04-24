@@ -12,11 +12,12 @@ public class CopyFileProcessor : IItemProcessor
     private readonly string _outputPath;
     private readonly string _outputDir;
 
-    public CopyFileProcessor(IProcessorContext context)
+    public CopyFileProcessor(IProcessorContext context, CopyFileProcessorSettings processorSettings)
     {
         _context = context;
+        string ext = processorSettings.KeepExtensionCase ? context.ItemExtension : context.ItemExtension.ToLowerInvariant();
         _outputDir = Path.Combine(context.OutputPath, context.ItemRelativePath);
-        _outputPath = Path.Combine(_outputDir, $"{context.ItemName}.{context.ItemExtension.ToLowerInvariant()}");
+        _outputPath = Path.Combine(_outputDir, $"{context.ItemName}.{ext}");
     }
 
     public bool Process(IReport? report)
@@ -24,7 +25,7 @@ public class CopyFileProcessor : IItemProcessor
         try
         {
             Directory.CreateDirectory(_outputDir);
-            
+
             File.Copy(_context.ItemPath, _outputPath, true);
             File.SetLastWriteTime(_outputPath, DateTime.Now);
             return true;
@@ -36,24 +37,23 @@ public class CopyFileProcessor : IItemProcessor
             return false;
         }
     }
-
-    public string[] GetOutputPaths()
-    {
-        return [_outputPath];
-    }
-
-    public string[] GetDependencies()
-    {
-        return [];
-    }
 }
 
 public class CopyFileProcessorFactory : IItemProcessorFactory
 {
     public bool SimpleProcessor => true;
 
+
+    public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
+    {
+        CopyFileProcessorSettings processorSettings = settings as CopyFileProcessorSettings ?? CopyFileProcessorSettings.Default;
+        string ext = processorSettings.KeepExtensionCase ? context.ItemExtension : context.ItemExtension.ToLowerInvariant();
+
+        return Path.Combine(context.OutputPath, context.ItemRelativePath, $"{context.ItemName}.{ext}");
+    }
+
     public IItemProcessor Create(IProcessorContext context, object? settings)
     {
-        return new CopyFileProcessor(context);
+        return new CopyFileProcessor(context, settings as CopyFileProcessorSettings ?? CopyFileProcessorSettings.Default);
     }
 }
