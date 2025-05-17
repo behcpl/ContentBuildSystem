@@ -19,7 +19,7 @@ public readonly struct PluginDescriptor
 
 public interface IPlugin
 {
-    public bool Initialize(IReadOnlyDictionary<string, object>? options);
+    public bool Initialize(IServiceRepository serviceRepository, IReadOnlyDictionary<string, object>? options, IReport? report);
 
     IEnumerable<PluginDescriptor> Descriptors { get; }
 }

@@ -25,6 +25,8 @@ public class ChunkFileReader
         }
     }
 
+    
+    
     public bool TryReadChunkHeader(out ChunkHeader header)
     {
         header = default;

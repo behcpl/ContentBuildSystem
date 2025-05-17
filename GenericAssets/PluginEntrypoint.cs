@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ContentBuildSystem.Interfaces;
 using GenericAssets.Legacy.Atlases;
 using GenericAssets.Legacy.Fonts;
@@ -19,7 +20,7 @@ public class PluginEntrypoint : IPlugin
         _descriptors = new List<PluginDescriptor>();
     }
 
-    public bool Initialize(IReadOnlyDictionary<string, object>? options)
+    public bool Initialize(IServiceRepository serviceRepository, IReadOnlyDictionary<string, object>? options, IReport? report)
     {
         bool debugOutput = options.GetValue("DebugOutput", false);
 

@@ -14,7 +14,7 @@ public class ProjectBuilder
 
     private readonly ProjectSerializer _projectSerializer;
     private readonly RuleProvider _ruleProvider;
-
+    private readonly ServiceRepository _serviceRepository;
     private PluginManager? _pluginManager;
 
     private ProjectDescription? _projectDescription;
@@ -24,7 +24,7 @@ public class ProjectBuilder
         _report = report;
         _projectSerializer = new ProjectSerializer();
         _ruleProvider = new RuleProvider(new RuleSerializer());
-
+        _serviceRepository = new ServiceRepository();
         // TODO: where to search plugins? project first then some default folder?
     }
 
@@ -40,7 +40,7 @@ public class ProjectBuilder
 
         string selfDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         
-        _pluginManager = new PluginManager(projectPath, selfDirectory, _report);
+        _pluginManager = new PluginManager(projectPath, selfDirectory, _serviceRepository, _report);
 
         foreach (PluginDescription pluginDescription in _projectDescription.Plugins)
         {
