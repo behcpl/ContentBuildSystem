@@ -39,7 +39,7 @@ public class ProjectBuilder
             return;
 
         string selfDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        
+
         _pluginManager = new PluginManager(projectPath, selfDirectory, _serviceRepository, _report);
 
         foreach (PluginDescription pluginDescription in _projectDescription.Plugins)
@@ -52,11 +52,11 @@ public class ProjectBuilder
 
     public bool Build(ContentBuilderOptions builderOptions, string? configuration)
     {
-        ContentBuilder contentBuilder = new ContentBuilder(builderOptions, _projectDescription!, _ruleProvider, new BuildItemManifestSerializer());
+        ContentBuilder contentBuilder = new(builderOptions, _projectDescription!, _ruleProvider, new BuildItemManifestSerializer());
 
         if (!contentBuilder.PrepareConfiguration(configuration, _report))
             return false;
-        
+
         return contentBuilder.BuildGroups(_report);
     }
 

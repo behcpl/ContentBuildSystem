@@ -7,14 +7,14 @@ namespace GenericAssets.Shader;
 public class IncludeResolver : IIncludeResolver
 {
     private readonly Action<string> _fileRequest;
-    
+
     public string GetFileId(string path) => Path.GetFullPath(path);
 
     public IncludeResolver(Action<string> fileRequest)
     {
         _fileRequest = fileRequest;
     }
-    
+
     public bool TryCreateReader(string sourceFileId, string includeParameter, out string? newFileId, out TextReader? reader, IReport? report)
     {
         string path2 = includeParameter.TrimStart('"').TrimEnd('"');

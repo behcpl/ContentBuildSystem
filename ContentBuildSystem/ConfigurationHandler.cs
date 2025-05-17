@@ -14,7 +14,7 @@ public class ConfigurationHandler
         public string[] ValidValues;
     }
 
-    private PartType[] _parts = [];
+    private PartType[] _parts = [ ];
 
     public bool Prepare(ConfigurationDescription? cfgDesc, string? activeConfiguration, IReport? report)
     {
@@ -49,7 +49,7 @@ public class ConfigurationHandler
 
             string[]? valid = null;
             cfgDesc.Components?.TryGetValue(formatParts[i], out valid);
-            _parts[i].ValidValues = valid ?? ["default"];
+            _parts[i].ValidValues = valid ?? [ "default" ];
 
             if (!_parts[i].ValidValues.Contains(_parts[i].Value))
             {
@@ -77,7 +77,7 @@ public class ConfigurationHandler
                     return false;
             }
         }
-       
+
         if (rulesetCfg.Whitelist != null)
         {
             foreach (PartType partType in _parts)

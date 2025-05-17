@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ContentBuildSystem.Interfaces;
 using GenericAssets.Legacy.Atlases;
 using GenericAssets.Legacy.Fonts;

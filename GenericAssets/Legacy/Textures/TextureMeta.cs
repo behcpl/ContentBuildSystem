@@ -17,7 +17,7 @@ public struct Margin
             Left = first.Left + second.Left,
             Top = first.Top + second.Top,
             Right = first.Right + second.Right,
-            Bottom = first.Bottom + second.Bottom
+            Bottom = first.Bottom + second.Bottom,
         };
     }
 
@@ -28,7 +28,7 @@ public struct Margin
             Left = value,
             Top = value,
             Right = value,
-            Bottom = value
+            Bottom = value,
         };
     }
 
@@ -39,7 +39,7 @@ public struct Margin
             Left = first.Left + second.Left,
             Top = first.Top + second.Top,
             Right = first.Right - second.Right,
-            Bottom = first.Bottom - second.Bottom
+            Bottom = first.Bottom - second.Bottom,
         };
     }
 }

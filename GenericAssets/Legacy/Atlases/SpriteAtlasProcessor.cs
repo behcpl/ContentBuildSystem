@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using ContentBuildSystem.Interfaces;
 using GenericAssets.Legacy.Textures;
@@ -21,11 +21,11 @@ public class SpriteAtlasProcessor : IItemProcessor
 
     public bool Process(IReport? report)
     {
-        TextureImporter textureImporter = new TextureImporter(false);
-        SpriteAtlasBuilder spriteAtlasBuilder = new SpriteAtlasBuilder(textureImporter, report);
-        SpriteAtlasBinarySerializer serializer = new SpriteAtlasBinarySerializer();
+        TextureImporter textureImporter = new(false);
+        SpriteAtlasBuilder spriteAtlasBuilder = new(textureImporter, report);
+        SpriteAtlasBinarySerializer serializer = new();
 
-        TextureProcessorSettings textureProcessorSettings = new TextureProcessorSettings { Compress = false };
+        TextureProcessorSettings textureProcessorSettings = new() { Compress = false };
 
         string outPath = Path.Combine(_context.OutputPath, _context.ItemRelativePath, $"{_context.ItemName}.bcatl");
         _context.RegisterOutputArtifact(outPath);
@@ -33,7 +33,7 @@ public class SpriteAtlasProcessor : IItemProcessor
         SpriteAtlasSource atlas = spriteAtlasBuilder.Import(_context.ItemPath, _context, textureProcessorSettings);
         serializer.Serialize(atlas, outPath);
 
-        TextureDebugOutput dbgOut = new TextureDebugOutput(_context.TempPath);
+        TextureDebugOutput dbgOut = new(_context.TempPath);
         dbgOut.DebugOut(_context.ItemName, atlas.Texture!);
 
         return true;
@@ -53,7 +53,7 @@ public class SpriteAtlasProcessorFactory : IItemProcessorFactory
 
     public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
     {
-        throw new System.NotSupportedException();
+        throw new NotSupportedException();
     }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)

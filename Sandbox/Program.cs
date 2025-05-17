@@ -14,22 +14,22 @@ using GenericAssets.Shader;
 
 namespace Sandbox;
 
-class Program
+internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         string projDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Example"));
         string projPath = Path.Combine(projDir, "example.asproj");
         Console.WriteLine($"FOUND: {File.Exists(projPath)}  {Path.GetFullPath(projPath)}");
-        ProjectSerializer serializer = new ProjectSerializer();
+        ProjectSerializer serializer = new();
         ProjectDescription? project = serializer.Deserialize(projPath, null);
 
-        RuleSerializer ruleSerializer = new RuleSerializer();
+        RuleSerializer ruleSerializer = new();
 
         ContentBuilderOptions options = ContentBuilderOptions.Build(projPath, null, null);
 
-        string configuration = "windows-legacy";//"windows-release";
-        RuleProvider ruleProvider = new RuleProvider(ruleSerializer);
+        string configuration = "windows-legacy"; //"windows-release";
+        RuleProvider ruleProvider = new(ruleSerializer);
 
         ruleProvider.AddProcessor("copy", new CopyFileProcessorFactory(), typeof(CopyFileProcessorSettings));
 
@@ -43,8 +43,8 @@ class Program
 
         IReport report = new VerboseConsoleReport();
         // IReport report = new ConsoleReport();
-        ContentBuilder builder = new ContentBuilder(options, project!, ruleProvider, new BuildItemManifestSerializer());
-        
+        ContentBuilder builder = new(options, project!, ruleProvider, new BuildItemManifestSerializer());
+
         bool success = builder.PrepareConfiguration(configuration, report) && builder.BuildGroups(report);
         report.Info($"DONE {success}");
 

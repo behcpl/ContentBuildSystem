@@ -18,7 +18,7 @@ public class ShaderGroupProcessor : IItemProcessor
     {
         AllowTrailingCommas = true,
         IncludeFields = true,
-        WriteIndented = true
+        WriteIndented = true,
     };
 
     private readonly IProcessorContext _context;
@@ -71,7 +71,7 @@ public class ShaderGroupProcessor : IItemProcessor
         using FileStream output = new(outputPath, FileMode.Create);
         JsonSerializer.Serialize(output, shaderGroupResource, _options);
         _context.RegisterOutputArtifact(outputPath);
-        
+
         return result;
     }
 

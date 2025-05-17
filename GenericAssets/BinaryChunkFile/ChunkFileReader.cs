@@ -7,7 +7,7 @@ public class ChunkFileReader
     private readonly BinaryReader _reader;
 
     // private long _nextChunkOffset;
-    
+
     public ChunkFileReader(BinaryReader reader)
     {
         _reader = reader;
@@ -25,16 +25,12 @@ public class ChunkFileReader
         }
     }
 
-    
-    
+
     public bool TryReadChunkHeader(out ChunkHeader header)
     {
         header = default;
         return false;
     }
-    
-    public void SkipChunk()
-    {
-        
-    }
+
+    public void SkipChunk() { }
 }

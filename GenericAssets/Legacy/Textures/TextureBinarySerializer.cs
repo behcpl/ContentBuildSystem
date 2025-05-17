@@ -8,7 +8,7 @@ public class TextureBinarySerializer
     {
         File.Delete(outputPath);
         using FileStream stream = File.OpenWrite(outputPath);
-        using BinaryWriter writer = new BinaryWriter(stream);
+        using BinaryWriter writer = new(stream);
 
         WriteHeader(writer);
         WriteTexture(writer, textureSource);
@@ -33,7 +33,7 @@ public class TextureBinarySerializer
         writer.Write((ushort)textureSource.Width);
         writer.Write((ushort)textureSource.Height);
         writer.Write((byte)textureSource.Format);
-        writer.Write((byte)flags);
+        writer.Write(flags);
         writer.Write((byte)0); // padding
         writer.Write((byte)0); // padding
         writer.Write(textureSource.Data!.Length);

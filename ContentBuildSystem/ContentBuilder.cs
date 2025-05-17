@@ -100,7 +100,7 @@ public class ContentBuilder
 
     private bool BuildGroup(GroupDescription groupDesc, IReport? report)
     {
-        BuildGroup buildGroup = new BuildGroup();
+        BuildGroup buildGroup = new();
         AddItems(buildGroup, groupDesc, Path.GetFullPath(groupDesc.Path!, _projectPath), report);
         _groups.Add(buildGroup);
 
@@ -151,7 +151,7 @@ public class ContentBuilder
 
         foreach (string subGroupPath in Directory.EnumerateDirectories(groupPath))
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(subGroupPath);
+            DirectoryInfo dirInfo = new(subGroupPath);
 
             if (!desc.IncludeEmptyFolderNames && dirInfo.Name.StartsWith('.'))
                 continue;
@@ -174,11 +174,11 @@ public class ContentBuilder
         string parentDir = string.Empty;
         if (dir != null)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(dir);
+            DirectoryInfo dirInfo = new(dir);
             parentDir = dirInfo.Name;
         }
 
-        FileInfo fileInfo = new FileInfo(itemPath);
+        FileInfo fileInfo = new(itemPath);
         if (!desc.IncludeHiddenAttribute && (fileInfo.Attributes & FileAttributes.Hidden) != 0)
         {
             report?.Info($"IGNORE: {itemPath}");
@@ -306,7 +306,7 @@ public class ContentBuilder
                 if (currentFiles.Length != (folder.Dependencies?.Length ?? 0))
                     return false;
 
-                HashSet<string> filesSet = new(folder.Dependencies ?? []);
+                HashSet<string> filesSet = new(folder.Dependencies ?? [ ]);
                 foreach (string filePath in currentFiles)
                 {
                     if (!filesSet.Contains(filePath))
@@ -339,7 +339,7 @@ public class ContentBuilder
         {
             Output = context.OutputArtifacts.ToArray(),
             Dependencies = context.SourceDependencies.ToArray(),
-            FolderDependencies = context.SourceFolderDependencies.Select(sf => new FolderDependency { Path = sf.Path, Recursive = sf.Recursive, Dependencies = sf.Files, Extensions = sf.Extensions }).ToArray()
+            FolderDependencies = context.SourceFolderDependencies.Select(sf => new FolderDependency { Path = sf.Path, Recursive = sf.Recursive, Dependencies = sf.Files, Extensions = sf.Extensions }).ToArray(),
         };
         _itemManifestSerializer.Serialize(manifestPath, _projectPath, manifest);
     }
@@ -356,14 +356,14 @@ public class ContentBuilder
 
         if (rule.Header.FileNamePattern != null)
         {
-            Regex regex = new Regex(rule.Header.FileNamePattern, RegexOptions.Singleline | RegexOptions.NonBacktracking);
+            Regex regex = new(rule.Header.FileNamePattern, RegexOptions.Singleline | RegexOptions.NonBacktracking);
             if (!regex.Match(fileName).Success)
                 return false;
         }
 
         if (rule.Header.FolderPattern != null)
         {
-            Regex regex = new Regex(rule.Header.FolderPattern, RegexOptions.Singleline | RegexOptions.NonBacktracking);
+            Regex regex = new(rule.Header.FolderPattern, RegexOptions.Singleline | RegexOptions.NonBacktracking);
             if (!regex.Match(folderName).Success)
                 return false;
         }
@@ -382,11 +382,11 @@ public class ContentBuilder
         public string OutputPath { get; set; } = string.Empty;
         public string TempPath { get; set; } = string.Empty;
 
-        public readonly List<string> SourceDependencies = [];
-        public readonly List<FolderSource> SourceFolderDependencies = [];
+        public readonly List<string> SourceDependencies = [ ];
+        public readonly List<FolderSource> SourceFolderDependencies = [ ];
 
-        public readonly List<string> OutputArtifacts = [];
-        public readonly List<string> OutputDependencies = [];
+        public readonly List<string> OutputArtifacts = [ ];
+        public readonly List<string> OutputDependencies = [ ];
 
         public void Reset()
         {
@@ -407,7 +407,7 @@ public class ContentBuilder
         public void RegisterSourceFolderDependency(string path, bool recursive, IReadOnlyList<string>? extensions)
         {
             string[] files = DirectoryHelper.EnumerateFiles(path, recursive, extensions);
-            SourceFolderDependencies.Add(new FolderSource { Path = path, Recursive = recursive, Extensions = extensions?.ToArray() ?? [], Files = files });
+            SourceFolderDependencies.Add(new FolderSource { Path = path, Recursive = recursive, Extensions = extensions?.ToArray() ?? [ ], Files = files });
         }
 
         public void RegisterOutputArtifact(string path)
@@ -430,8 +430,8 @@ public class ContentBuilder
         {
             public bool Recursive;
             public string Path = string.Empty;
-            public string[] Extensions = [];
-            public string[] Files = [];
+            public string[] Extensions = [ ];
+            public string[] Files = [ ];
         }
     }
 }

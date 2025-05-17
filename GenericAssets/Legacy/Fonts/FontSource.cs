@@ -5,14 +5,14 @@ namespace GenericAssets.Legacy.Fonts;
 
 public class FontGlyphSource
 {
-    public int Id; 
+    public int Id;
     public int X, Y, Width, Height;
     public int XOffset, YOffset, XAdvance;
 }
 
 public class FontKerningSource
 {
-    public int Id; 
+    public int Id;
     public int IdNext;
     public int XAdjust;
 }
@@ -28,4 +28,3 @@ public class FontSource
     public int SpaceWidth;
     public int EmWidth;
 }
-

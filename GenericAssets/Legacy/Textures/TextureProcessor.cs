@@ -19,8 +19,8 @@ public class TextureProcessor : IItemProcessor
 
     public bool Process(IReport? report)
     {
-        TextureImporter textureImporter = new TextureImporter(true);
-        TextureBinarySerializer serializer = new TextureBinarySerializer();
+        TextureImporter textureImporter = new();
+        TextureBinarySerializer serializer = new();
 
         Directory.CreateDirectory(Path.Combine(_context.OutputPath, _context.ItemRelativePath));
 

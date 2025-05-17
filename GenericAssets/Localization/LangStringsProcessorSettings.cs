@@ -2,9 +2,9 @@
 
 public class LangStringsProcessorSettings
 {
-    public static LangStringsProcessorSettings Default = new LangStringsProcessorSettings
+    public static LangStringsProcessorSettings Default = new()
     {
-        Delimiter = "|"
+        Delimiter = "|",
     };
 
     public string? Delimiter;

@@ -29,15 +29,18 @@ public class TextureImporter
                 format = TextureFormat.R8;
                 data = image.Data;
                 break;
+
             case ColorComponents.GreyAlpha: // not directly supported, expand to RGBA8888
                 format = TextureFormat.RGBA8888;
                 data = ExpandGrayAlpha(image.Data);
                 hasAlpha = HasAlpha(data);
                 break;
+
             case ColorComponents.RedGreenBlue: // not directly supported, expand to RGBX8888
                 format = TextureFormat.RGBA8888;
                 data = ExpandRgb(image.Data);
                 break;
+
             case ColorComponents.RedGreenBlueAlpha: // RGBA8888
                 format = TextureFormat.RGBA8888;
                 data = image.Data;
@@ -53,7 +56,7 @@ public class TextureImporter
                 PremulAlphaGamma(data!);
         }
 
-        Margin offset = new Margin();
+        Margin offset = new();
         int width = image.Width;
         int height = image.Height;
         if (format == TextureFormat.RGBA8888 && settings.AddFrame)
@@ -90,11 +93,11 @@ public class TextureImporter
             Height = height,
             Format = format,
             Data = data,
-            AlphaMode = hasAlpha ? AlphaMode.NONE : (settings.PremultiplyAlpha || settings.PremultipliedAlpha) ? AlphaMode.PREMULTIPLIED : AlphaMode.STRAIGHT,
+            AlphaMode = hasAlpha ? AlphaMode.NONE : settings.PremultiplyAlpha || settings.PremultipliedAlpha ? AlphaMode.PREMULTIPLIED : AlphaMode.STRAIGHT,
             IsLinear = settings.LinearSpace,
             // Margin = settings.Margin,
             // Pivot = settings.Pivot,
-            SourceOffset = offset
+            SourceOffset = offset,
         };
     }
 
@@ -171,20 +174,20 @@ public class TextureImporter
         byte[] dest = new byte[newWidth * newHeight * 4];
 
         for (int y = 0; y < height; y++)
-        {  
+        {
             Array.Copy(src, y * width * 4, dest, ((y + 1) * newWidth + 1) * 4, width * 4);
 
-            dest[((y + 1) * newWidth) * 4 + 0] = src[(y * width) * 4 + 0];
-            dest[((y + 1) * newWidth) * 4 + 1] = src[(y * width) * 4 + 1];
-            dest[((y + 1) * newWidth) * 4 + 2] = src[(y * width) * 4 + 2];
-            dest[((y + 1) * newWidth) * 4 + 3] = src[(y * width) * 4 + 3];
+            dest[(y + 1) * newWidth * 4 + 0] = src[y * width * 4 + 0];
+            dest[(y + 1) * newWidth * 4 + 1] = src[y * width * 4 + 1];
+            dest[(y + 1) * newWidth * 4 + 2] = src[y * width * 4 + 2];
+            dest[(y + 1) * newWidth * 4 + 3] = src[y * width * 4 + 3];
 
             dest[((y + 1) * newWidth + width + 1) * 4 + 0] = src[(y * width + width - 1) * 4 + 0];
             dest[((y + 1) * newWidth + width + 1) * 4 + 1] = src[(y * width + width - 1) * 4 + 1];
             dest[((y + 1) * newWidth + width + 1) * 4 + 2] = src[(y * width + width - 1) * 4 + 2];
             dest[((y + 1) * newWidth + width + 1) * 4 + 3] = src[(y * width + width - 1) * 4 + 3];
         }
-     
+
         Array.Copy(src, 0, dest, 4, width * 4);
         Array.Copy(src, (height - 1) * width * 4, dest, ((height + 1) * newWidth + 1) * 4, width * 4);
 
@@ -198,10 +201,10 @@ public class TextureImporter
         dest[(newWidth - 1) * 4 + 2] = src[(width - 1) * 4 + 2];
         dest[(newWidth - 1) * 4 + 3] = src[(width - 1) * 4 + 3];
 
-        dest[((newHeight - 1) * newWidth) * 4 + 0] = src[(height - 1) * width * 4 + 0];
-        dest[((newHeight - 1) * newWidth) * 4 + 1] = src[(height - 1) * width * 4 + 1];
-        dest[((newHeight - 1) * newWidth) * 4 + 2] = src[(height - 1) * width * 4 + 2];
-        dest[((newHeight - 1) * newWidth) * 4 + 3] = src[(height - 1) * width * 4 + 3];
+        dest[(newHeight - 1) * newWidth * 4 + 0] = src[(height - 1) * width * 4 + 0];
+        dest[(newHeight - 1) * newWidth * 4 + 1] = src[(height - 1) * width * 4 + 1];
+        dest[(newHeight - 1) * newWidth * 4 + 2] = src[(height - 1) * width * 4 + 2];
+        dest[(newHeight - 1) * newWidth * 4 + 3] = src[(height - 1) * width * 4 + 3];
 
         dest[((newHeight - 1) * newWidth + newWidth - 1) * 4 + 0] = src[((height - 1) * width + width - 1) * 4 + 0];
         dest[((newHeight - 1) * newWidth + newWidth - 1) * 4 + 1] = src[((height - 1) * width + width - 1) * 4 + 1];

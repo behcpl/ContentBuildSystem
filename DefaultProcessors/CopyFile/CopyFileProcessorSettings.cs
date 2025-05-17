@@ -5,8 +5,8 @@ namespace DefaultProcessors.CopyFile;
 [Serializable]
 public class CopyFileProcessorSettings
 {
-    public static CopyFileProcessorSettings Default = new CopyFileProcessorSettings();
-    
+    public static CopyFileProcessorSettings Default = new();
+
     public bool KeepExtensionCase; // false - force lowercase
     // TODO: add renaming options
     // string Format; "prefix_{0}_decor"

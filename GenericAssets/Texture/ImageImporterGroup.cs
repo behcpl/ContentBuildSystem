@@ -10,11 +10,11 @@ public class ImageImporterGroup : IImporterGroup<ImageData>
     private readonly Dictionary<string, IImporter<ImageData>> _mapExtensions;
 
     private readonly List<string> _extensions;
-    
+
     public ImageImporterGroup()
     {
         _mapExtensions = new Dictionary<string, IImporter<ImageData>>();
-        _extensions = [];
+        _extensions = [ ];
     }
 
     public bool TryImport(string path, out ImageData? result, IReport? report)
@@ -32,7 +32,7 @@ public class ImageImporterGroup : IImporterGroup<ImageData>
 
     public void AddImporter(IImporter<ImageData> importer, IEnumerable<string> fileExtensions)
     {
-        HashSet<string> set = [];
+        HashSet<string> set = [ ];
         foreach (string oldExt in _extensions)
         {
             set.Add(oldExt);
@@ -43,7 +43,7 @@ public class ImageImporterGroup : IImporterGroup<ImageData>
             _mapExtensions[newExt] = importer;
             set.Add(newExt);
         }
-        
+
         _extensions.Clear();
         _extensions.AddRange(set);
     }

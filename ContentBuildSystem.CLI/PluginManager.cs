@@ -21,16 +21,16 @@ public class PluginManager
         _report = report;
     }
 
-    public IPlugin LoadPlugin(string pluginPath,  Dictionary<string, object>? options)
+    public IPlugin LoadPlugin(string pluginPath, Dictionary<string, object>? options)
     {
         string path = Path.Combine(_projectPath, pluginPath);
-        if(!File.Exists(path))
+        if (!File.Exists(path))
             path = Path.Combine(_rootPath, pluginPath);
-     
-        if(!File.Exists(path))
+
+        if (!File.Exists(path))
             throw new NotImplementedException($"No plugin found at path: '{pluginPath}'!");
-        
-        LoadContext context = new LoadContext(path, _report);
+
+        LoadContext context = new(path, _report);
         Assembly assembly = context.LoadFromAssemblyPath(path);
 
         Type[] types = assembly.GetTypes();

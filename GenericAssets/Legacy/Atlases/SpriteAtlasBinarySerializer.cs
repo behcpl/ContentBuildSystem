@@ -11,7 +11,7 @@ public class SpriteAtlasBinarySerializer
     {
         File.Delete(outputPath);
         using FileStream stream = File.OpenWrite(outputPath);
-        using BinaryWriter writer = new BinaryWriter(stream);
+        using BinaryWriter writer = new(stream);
 
         WriteHeader(writer);
 

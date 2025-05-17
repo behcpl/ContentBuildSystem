@@ -11,8 +11,8 @@ public class GroupDescription
     public bool Recursive;
     public bool Flatten;
     public RulesetDescription[]? Ruleset;
-   
-    public bool IncludeEmptyFileNames; // i.e. .gitignore, etc
+
+    public bool IncludeEmptyFileNames;   // i.e. .gitignore, etc
     public bool IncludeEmptyFolderNames; // i.e. .git, etc
     public bool IncludeHiddenAttribute;
 }

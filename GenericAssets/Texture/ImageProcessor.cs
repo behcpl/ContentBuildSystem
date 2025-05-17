@@ -1,4 +1,5 @@
-﻿using ContentBuildSystem.Interfaces;
+﻿using System;
+using ContentBuildSystem.Interfaces;
 
 namespace GenericAssets.Texture;
 
@@ -6,17 +7,17 @@ public class ImageProcessor : IItemProcessor
 {
     public bool Process(IReport? report)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public string[] GetOutputPaths()
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public string[] GetDependencies()
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }
 
@@ -26,7 +27,7 @@ public class ImageProcessorFactory : IItemProcessorFactory
 
     public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)

@@ -30,9 +30,9 @@ public class SdfFontProcessor : IItemProcessor
 
     public bool Process(IReport? report)
     {
-        SdfFontGenerator generator = new SdfFontGenerator();
+        SdfFontGenerator generator = new();
         FontSource font = generator.Import(_context.ItemPath);
-        FontBinarySerializer serializer = new FontBinarySerializer();
+        FontBinarySerializer serializer = new();
 
         Directory.CreateDirectory(Path.Combine(_context.OutputPath, _context.ItemRelativePath));
         _inputFiles.Add(_context.ItemPath);
@@ -42,7 +42,7 @@ public class SdfFontProcessor : IItemProcessor
 
         if (_debugOutput)
         {
-            TextureDebugOutput dbgOut = new TextureDebugOutput(_context.TempPath);
+            TextureDebugOutput dbgOut = new(_context.TempPath);
             dbgOut.DebugOut(_context.ItemName, font.Texture!);
         }
 

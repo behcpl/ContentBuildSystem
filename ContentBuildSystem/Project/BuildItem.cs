@@ -1,6 +1,3 @@
 ﻿namespace ContentBuildSystem.Project;
 
-public class BuildItem
-{
-    
-}
+public class BuildItem { }

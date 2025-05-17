@@ -10,7 +10,7 @@ public class RuleSerializer
     private static readonly JsonSerializerOptions _options = new()
     {
         AllowTrailingCommas = true,
-        IncludeFields = true
+        IncludeFields = true,
     };
 
     public RuleHeader? GetHeader(string text)

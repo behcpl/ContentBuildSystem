@@ -16,17 +16,17 @@ public class ChunkFileWriter
     {
         _writer.Write(type);
 
-        MemoryStream stream = new MemoryStream(1024*1024);
-        BinaryWriter subWriter = new BinaryWriter(stream);
+        MemoryStream stream = new(1024 * 1024);
+        BinaryWriter subWriter = new(stream);
 
         writeCallback(subWriter);
 
         stream.Seek(0, SeekOrigin.Begin);
-        
+
         _writer.Write((int)stream.Length);
         stream.CopyTo(_writer.BaseStream);
     }
-    
+
     public void WriteData(uint type, ReadOnlySpan<byte> data)
     {
         _writer.Write(type);

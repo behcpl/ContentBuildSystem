@@ -9,7 +9,7 @@ public class BuildGroup
     {
         public readonly string Path;
         public readonly Rule Rule;
-        
+
         public ItemType(string path, Rule rule)
         {
             Path = path;
@@ -17,5 +17,5 @@ public class BuildGroup
         }
     }
 
-    public readonly List<ItemType> Items = new List<ItemType>();
+    public readonly List<ItemType> Items = new();
 }

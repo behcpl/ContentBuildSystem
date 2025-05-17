@@ -47,10 +47,10 @@ public class SdfFontGenerator
         string metaPath = Path.Combine(dir, $"{name}.meta");
 
         // TODO: use fntgen file
-        VectorFontMeta meta = new VectorFontMeta { FontSize = 32, Characters = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890,./;'[]\\`-=~!@#$%^&*()_+{}|:\"<>?" };
+        VectorFontMeta meta = new() { FontSize = 32, Characters = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890,./;'[]\\`-=~!@#$%^&*()_+{}|:\"<>?" };
 
         byte[] fontBytes = File.ReadAllBytes(path);
-        FontSource font = new FontSource();
+        FontSource font = new();
 
         Build(font, meta, fontBytes);
 
@@ -59,7 +59,7 @@ public class SdfFontGenerator
 
     private unsafe void Build(FontSource font, VectorFontMeta meta, byte[] fontBytes)
     {
-        StbTrueType.stbtt_fontinfo fontInfo = new StbTrueType.stbtt_fontinfo();
+        StbTrueType.stbtt_fontinfo fontInfo = new();
         fixed (byte* ttfPtr = fontBytes)
         {
             if (StbTrueType.stbtt_InitFont(fontInfo, ttfPtr, 0) == 0)
@@ -101,7 +101,7 @@ public class SdfFontGenerator
 
         int defaultPadding = meta.FontSize / 4;
         int totalArea = 0;
-        List<SdfFontGlyph> glyphs = new List<SdfFontGlyph>();
+        List<SdfFontGlyph> glyphs = new();
 
         foreach (char cp in meta.Characters!)
         {
@@ -126,7 +126,7 @@ public class SdfFontGenerator
         widthPow2++;
 
         int heightPow2 = widthPow2 * 4;
-        Packer packer = new Packer(widthPow2 - spacing, heightPow2 - spacing);
+        Packer packer = new(widthPow2 - spacing, heightPow2 - spacing);
 
         glyphs.Sort(new SdfFontGlyphComparer());
 
@@ -141,7 +141,7 @@ public class SdfFontGenerator
             usedHeight = Math.Max(usedHeight, packRectangle.Y + packRectangle.Height + spacing);
         }
 
-        usedHeight = (usedHeight + 3) & (~0x3);
+        usedHeight = (usedHeight + 3) & ~0x3;
 
         byte[] data = new byte[widthPow2 * usedHeight];
 
@@ -152,17 +152,18 @@ public class SdfFontGenerator
         {
             SdfFontGlyph fontGlyph = (SdfFontGlyph)packRectangle.Data;
 
-            font.Glyphs.Add(new FontGlyphSource
-            {
-                Id = fontGlyph.Id,
-                Width = fontGlyph.Width,
-                Height = fontGlyph.Height,
-                XOffset = fontGlyph.XOffset,
-                YOffset = fontGlyph.YOffset + font.BaseOffset,
-                XAdvance = fontGlyph.XAdvance,
-                X = packRectangle.X + spacing,
-                Y = packRectangle.Y + spacing,
-            });
+            font.Glyphs.Add(
+                new FontGlyphSource
+                {
+                    Id = fontGlyph.Id,
+                    Width = fontGlyph.Width,
+                    Height = fontGlyph.Height,
+                    XOffset = fontGlyph.XOffset,
+                    YOffset = fontGlyph.YOffset + font.BaseOffset,
+                    XAdvance = fontGlyph.XAdvance,
+                    X = packRectangle.X + spacing,
+                    Y = packRectangle.Y + spacing,
+                });
 
             for (int y = 0; y < fontGlyph.Height; y++)
             {
@@ -179,7 +180,7 @@ public class SdfFontGenerator
             AlphaMode = AlphaMode.NONE,
             Data = data,
             Format = TextureFormat.R8,
-            IsLinear = true
+            IsLinear = true,
         };
     }
 
@@ -196,7 +197,7 @@ public class SdfFontGenerator
         int w, h, xoff, yoff;
         byte* sdf = StbTrueType.stbtt_GetGlyphSDF(fontInfo, scaleFactor, glyphId, paddingPixels, 128, 128.0f / paddingPixels, &w, &h, &xoff, &yoff);
 
-        SdfFontGlyph glyph = new SdfFontGlyph
+        SdfFontGlyph glyph = new()
         {
             Id = cp,
             Width = w,
@@ -204,7 +205,7 @@ public class SdfFontGenerator
             Data = new byte[w * h],
             XOffset = xoff,
             YOffset = yoff,
-            XAdvance = (int)Math.Round(advance * scaleFactor)
+            XAdvance = (int)Math.Round(advance * scaleFactor),
         };
 
         fixed (byte* ptr = &glyph.Data[0])

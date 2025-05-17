@@ -10,7 +10,7 @@ public class FontBinarySerializer
     {
         File.Delete(outputPath);
         using FileStream stream = File.OpenWrite(outputPath);
-        using BinaryWriter writer = new BinaryWriter(stream);
+        using BinaryWriter writer = new(stream);
 
         WriteHeader(writer);
 

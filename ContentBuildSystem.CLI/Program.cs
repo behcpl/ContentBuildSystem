@@ -81,7 +81,7 @@ internal static class Program
         builder.LoadProject(projectPath);
         builder.LoadPlugins(builderOptions.ProjectPath);
 
-        using ProjectMonitor monitor = new ProjectMonitor(builder, builderOptions, options.Configuration ?? "default");
+        using ProjectMonitor monitor = new(builder, builderOptions, options.Configuration ?? "default");
 
         while (running)
         {

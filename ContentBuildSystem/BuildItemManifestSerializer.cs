@@ -60,13 +60,13 @@ public class BuildItemManifestSerializer
         using FileStream file = File.OpenRead(path);
         using TextReader reader = new StreamReader(file);
 
-        List<string> outPaths = new List<string>();
-        List<string> inPaths = new List<string>();
+        List<string> outPaths = new();
+        List<string> inPaths = new();
 
-        List<string> folderFiles = new List<string>();
+        List<string> folderFiles = new();
         FolderDependency? currentFolder = null;
 
-        List<FolderDependency> folders = new List<FolderDependency>();
+        List<FolderDependency> folders = new();
 
         while (true)
         {
@@ -106,7 +106,7 @@ public class BuildItemManifestSerializer
                 currentFolder = new FolderDependency
                 {
                     Recursive = recursive,
-                    Path = Path.GetFullPath(elements[0], projectPath)
+                    Path = Path.GetFullPath(elements[0], projectPath),
                 };
                 folders.Add(currentFolder);
 

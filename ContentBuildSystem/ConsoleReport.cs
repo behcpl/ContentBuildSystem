@@ -38,7 +38,7 @@ public class ConsoleReport : IReport
         _group = groupName;
         _headerShown = false;
 
-        GroupBar gb = new GroupBar();
+        GroupBar gb = new();
         gb.Row = Console.CursorTop;
         gb.Total = expectedCount;
 
@@ -46,7 +46,9 @@ public class ConsoleReport : IReport
             Console.Write(groupName);
 
         for (int i = groupName.Length; i < 30; i++)
+        {
             Console.Write(" ");
+        }
 
         DrawBar(0, expectedCount);
         Console.WriteLine();

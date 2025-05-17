@@ -45,7 +45,7 @@ public class SpriteAtlasBuilder
     {
         _textureImporter = textureImporter;
         _report = report;
-        _options = new JsonSerializerOptions { IncludeFields = true, AllowTrailingCommas = true, };
+        _options = new JsonSerializerOptions { IncludeFields = true, AllowTrailingCommas = true };
     }
 
     public SpriteAtlasSource Import(string path, IProcessorContext context, TextureProcessorSettings textureProcessorSettings)
@@ -56,7 +56,7 @@ public class SpriteAtlasBuilder
 
         Dictionary<string, SpriteExtras> spriteExtras = meta.SpriteExtras ?? new Dictionary<string, SpriteExtras>();
 
-        List<SpriteAtlasTexture> textures = new List<SpriteAtlasTexture>();
+        List<SpriteAtlasTexture> textures = new();
         LoadFiles(directoryPath, textures, meta.Files, context, textureProcessorSettings, spriteExtras);
         LoadFolders(directoryPath, textures, meta.Folders, context, textureProcessorSettings, spriteExtras);
 
@@ -80,7 +80,7 @@ public class SpriteAtlasBuilder
         widthPow2++;
 
         int heightPow2 = widthPow2 * 4;
-        Packer packer = new Packer(widthPow2 - meta.Spacing, heightPow2 - meta.Spacing);
+        Packer packer = new(widthPow2 - meta.Spacing, heightPow2 - meta.Spacing);
 
         textures.Sort(new SpriteAtlasTextureComparer());
 
@@ -95,11 +95,11 @@ public class SpriteAtlasBuilder
             usedHeight = Math.Max(usedHeight, packRectangle.Y + packRectangle.Height + meta.Spacing);
         }
 
-        usedHeight = (usedHeight + 3) & (~0x3);
+        usedHeight = (usedHeight + 3) & ~0x3;
 
         byte[] data = new byte[widthPow2 * usedHeight * 4];
 
-        SpriteAtlasSource spriteAtlasSource = new SpriteAtlasSource();
+        SpriteAtlasSource spriteAtlasSource = new();
         spriteAtlasSource.Sprites = new List<SpriteSource>(textures.Count);
 
         foreach (PackerRectangle packRectangle in packer.PackRectangles)
@@ -115,13 +115,14 @@ public class SpriteAtlasBuilder
                 Bottom = meta.Spacing + packRectangle.Y + atlasTexture.Texture!.Height,
             };
 
-            spriteAtlasSource.Sprites.Add(new SpriteSource
-            {
-                Placement = Margin.Offset(atlasTexture.Placement, atlasTexture.Texture!.SourceOffset),
-                Margin = atlasTexture.Texture!.Margin,
-                Pivot = atlasTexture.Texture!.Pivot,
-                Name = atlasTexture.Name,
-            });
+            spriteAtlasSource.Sprites.Add(
+                new SpriteSource
+                {
+                    Placement = Margin.Offset(atlasTexture.Placement, atlasTexture.Texture!.SourceOffset),
+                    Margin = atlasTexture.Texture!.Margin,
+                    Pivot = atlasTexture.Texture!.Pivot,
+                    Name = atlasTexture.Name,
+                });
 
             for (int y = 0; y < texture.Height; y++)
             {
@@ -136,7 +137,7 @@ public class SpriteAtlasBuilder
             AlphaMode = AlphaMode.PREMULTIPLIED,
             Data = data,
             Format = TextureFormat.RGBA8888,
-            IsLinear = false
+            IsLinear = false,
         };
 
         packer.Dispose();
@@ -175,7 +176,7 @@ public class SpriteAtlasBuilder
             return;
 
         // TODO: get this from importer
-        string[] extensions = ["png"];
+        string[] extensions = [ "png" ];
 
         foreach (string folder in metaFolders)
         {
@@ -188,7 +189,7 @@ public class SpriteAtlasBuilder
             }
 
             context.RegisterSourceFolderDependency(folderPath, false, extensions);
-            
+
             string[] filePaths = DirectoryHelper.EnumerateFiles(folderPath, false, extensions);
             foreach (string filePath in filePaths)
             {

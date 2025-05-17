@@ -1,6 +1,3 @@
 ﻿namespace GenericAssets.Texture;
 
-public class TextureBinarySerializer
-{
-    
-}
+public class TextureBinarySerializer { }

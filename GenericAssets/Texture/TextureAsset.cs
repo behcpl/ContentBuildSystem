@@ -12,7 +12,7 @@ public class TextureAsset
     public int MipMaps;
 
     public TextureSurface[]? Surfaces; // [Count (* 6 for cubemaps) * MipMaps]
-    public TextureVolume[]? Volumes; // [MipMaps]
+    public TextureVolume[]? Volumes;   // [MipMaps]
 }
 
 public enum TextureAssetType
@@ -21,7 +21,7 @@ public enum TextureAssetType
     TEXTURE_2D_ARRAY,
     CUBE_MAP,
     CUBE_MAP_ARRAY,
-    TEXTURE_3D
+    TEXTURE_3D,
 }
 
 public class TextureSurface
@@ -87,20 +87,20 @@ public readonly struct TextureFormat
     public const uint BLOCK_12x12 = 0xCC;
     // public const uint BLOCK_8x4 = 0x84; // PVRTC 2bit mode 
 
-    public const uint METHOD_BC1 = 1; // DXT1, S3tc
-    public const uint METHOD_BC1_GAMMA = 2; // DXT1, S3tc
-    public const uint METHOD_BC2 = 3; // DXT3
-    public const uint METHOD_BC2_GAMMA = 4; // DXT3
-    public const uint METHOD_BC3 = 5; // DXT5
-    public const uint METHOD_BC3_GAMMA = 6; // DXT5
-    public const uint METHOD_BC4 = 7; // single alpha block from DXT5
-    public const uint METHOD_BC5 = 8; // ATI2n (2x alpha block)
-    public const uint METHOD_BC6 = 9; // hdr
-    public const uint METHOD_BC7 = 10; // high quality RGB
-    public const uint METHOD_BC7_GAMMA = 11; // high quality RGB
-    public const uint METHOD_ETC2_RGB = 17; // required by GLES 3.0
-    public const uint METHOD_ETC2_RGB_GAMMA = 18; // required by GLES 3.0
-    public const uint METHOD_ETC2_RGBA = 19; // required by GLES 3.0
+    public const uint METHOD_BC1 = 1;              // DXT1, S3tc
+    public const uint METHOD_BC1_GAMMA = 2;        // DXT1, S3tc
+    public const uint METHOD_BC2 = 3;              // DXT3
+    public const uint METHOD_BC2_GAMMA = 4;        // DXT3
+    public const uint METHOD_BC3 = 5;              // DXT5
+    public const uint METHOD_BC3_GAMMA = 6;        // DXT5
+    public const uint METHOD_BC4 = 7;              // single alpha block from DXT5
+    public const uint METHOD_BC5 = 8;              // ATI2n (2x alpha block)
+    public const uint METHOD_BC6 = 9;              // hdr
+    public const uint METHOD_BC7 = 10;             // high quality RGB
+    public const uint METHOD_BC7_GAMMA = 11;       // high quality RGB
+    public const uint METHOD_ETC2_RGB = 17;        // required by GLES 3.0
+    public const uint METHOD_ETC2_RGB_GAMMA = 18;  // required by GLES 3.0
+    public const uint METHOD_ETC2_RGBA = 19;       // required by GLES 3.0
     public const uint METHOD_ETC2_RGBA_GAMMA = 20; // required by GLES 3.0
     public const uint METHOD_EAC_R = 21;
     public const uint METHOD_EAC_RG = 22;
@@ -169,7 +169,7 @@ public readonly struct TextureFormat
         uint size = method switch
         {
             METHOD_BC1 or METHOD_BC1_GAMMA or METHOD_BC4 or METHOD_ETC2_RGB or METHOD_ETC2_RGB_GAMMA or METHOD_EAC_R => 8,
-            _ => 16
+            _                                                                                                        => 16,
         };
 
         return new TextureFormat(_COMPRESSED | block | (method << _METHOD_OFFSET) | (size << _SIZE_OFFSET));
@@ -180,7 +180,7 @@ public readonly struct TextureFormat
         uint size = packedFormat switch
         {
             PACKED_4_4_4_4 or PACKED_5_5_5_1 or PACKED_5_6_5 => 2,
-            _ => 4
+            _                                                => 4,
         };
 
         return new TextureFormat(_PACKED | packedFormat | (size << _SIZE_OFFSET));

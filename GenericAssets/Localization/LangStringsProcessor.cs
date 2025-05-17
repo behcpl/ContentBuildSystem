@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -69,7 +70,7 @@ public class LangStringsProcessor : IItemProcessor
 
             string outputPath = Path.Combine(_context.OutputPath, _context.ItemRelativePath, $"{languages[i].Key}.json");
             File.WriteAllText(outputPath, json, Encoding.UTF8);
-            
+
             _context.RegisterOutputArtifact(outputPath);
         }
 
@@ -83,7 +84,7 @@ public class LangStringsProcessorFactory : IItemProcessorFactory
 
     public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
     {
-        throw new System.NotSupportedException("Lang string can have multiple output artifacts!");
+        throw new NotSupportedException("Lang string can have multiple output artifacts!");
     }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)

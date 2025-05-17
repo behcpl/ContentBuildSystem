@@ -10,7 +10,7 @@ public class ProjectSerializer
     private static readonly JsonSerializerOptions _options = new()
     {
         AllowTrailingCommas = true,
-        IncludeFields = true
+        IncludeFields = true,
     };
 
     public ProjectDescription? Deserialize(string path, IReport? report)

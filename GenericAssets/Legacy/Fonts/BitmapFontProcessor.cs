@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using ContentBuildSystem.Interfaces;
 using GenericAssets.Legacy.Textures;
 
@@ -24,9 +25,9 @@ public class BitmapFontProcessor : IItemProcessor
 
     public bool Process(IReport? report)
     {
-        TextureImporter texImporter = new TextureImporter();
-        BitmapFontImporter bmfImporter = new BitmapFontImporter(texImporter, report);
-        FontBinarySerializer serializer = new FontBinarySerializer();
+        TextureImporter texImporter = new();
+        BitmapFontImporter bmfImporter = new(texImporter, report);
+        FontBinarySerializer serializer = new();
 
         FontSource font = bmfImporter.Import(_context.ItemPath, _context);
 
@@ -45,7 +46,7 @@ public class BitmapFontProcessorFactory : IItemProcessorFactory
 
     public string GetDefaultOutputArtifactPath(IProcessorContext context, object? settings)
     {
-        throw new System.NotSupportedException();
+        throw new NotSupportedException();
     }
 
     public IItemProcessor Create(IProcessorContext context, object? settings)

@@ -20,14 +20,14 @@ public class BitmapFontImporter
 
     public FontSource Import(string path, IProcessorContext context)
     {
-        FontSource fontSource = new FontSource();
+        FontSource fontSource = new();
         ParseBmf(fontSource, path, out string pageName);
 
         string pageTexturePath = Path.Combine(Path.GetDirectoryName(path)!, pageName);
 
         context.RegisterSourceDependency(Path.GetFullPath(pageTexturePath));
 
-        TextureProcessorSettings settings = new TextureProcessorSettings { LinearSpace = true };
+        TextureProcessorSettings settings = new() { LinearSpace = true };
 
         fontSource.Texture = _textureImporter.Import(pageTexturePath, settings, _report);
 
@@ -60,19 +60,25 @@ public class BitmapFontImporter
             {
                 case "info":
                     break;
+
                 case "common":
                     ParseCommon(font, tokens);
                     break;
+
                 case "page":
                     pageName = ParsePage(tokens);
                     break;
+
                 case "chars":
                     break;
+
                 case "char":
                     ParseChar(font, tokens);
                     break;
+
                 case "kernings":
                     break;
+
                 case "kerning":
                     ParseKerning(font, tokens);
                     break;
@@ -102,6 +108,7 @@ public class BitmapFontImporter
                 case "lineHeight":
                     font.LineHeight = int.Parse(pair[1]);
                     break;
+
                 case "base":
                     font.BaseOffset = int.Parse(pair[1]);
                     break;
@@ -142,7 +149,7 @@ public class BitmapFontImporter
 
     private static void ParseChar(FontSource font, IReadOnlyList<string> tokens)
     {
-        FontGlyphSource glyph = new FontGlyphSource();
+        FontGlyphSource glyph = new();
 
         for (int index = 1; index < tokens.Count; index++)
         {
@@ -155,15 +162,19 @@ public class BitmapFontImporter
                 case "id":
                     glyph.Id = int.Parse(pair[1]);
                     break;
+
                 case "x":
                     glyph.X = int.Parse(pair[1]);
                     break;
+
                 case "y":
                     glyph.Y = int.Parse(pair[1]);
                     break;
+
                 case "width":
                     glyph.Width = int.Parse(pair[1]);
                     break;
+
                 case "height":
                     glyph.Height = int.Parse(pair[1]);
                     break;
@@ -171,9 +182,11 @@ public class BitmapFontImporter
                 case "xoffset":
                     glyph.XOffset = int.Parse(pair[1]);
                     break;
+
                 case "yoffset":
                     glyph.YOffset = int.Parse(pair[1]);
                     break;
+
                 case "xadvance":
                     glyph.XAdvance = int.Parse(pair[1]);
                     break;
@@ -207,9 +220,11 @@ public class BitmapFontImporter
                 case "first":
                     first = int.Parse(pair[1]);
                     break;
+
                 case "second":
                     second = int.Parse(pair[1]);
                     break;
+
                 case "amount":
                     amount = int.Parse(pair[1]);
                     break;

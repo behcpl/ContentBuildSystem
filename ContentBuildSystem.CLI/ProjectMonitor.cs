@@ -9,10 +9,10 @@ public class ProjectMonitor : IDisposable
     private readonly ProjectBuilder _builder;
     private readonly ContentBuilderOptions _options;
     private readonly string _configuration;
-    private object _lock;
+    private readonly object _lock;
     private bool _rebuild;
     private DateTime _rebuildTime;
-    private TimeSpan _rebuildDelay;
+    private readonly TimeSpan _rebuildDelay;
 
     private readonly List<FileSystemWatcher> _watchers;
 
@@ -32,7 +32,7 @@ public class ProjectMonitor : IDisposable
 
     private void WatchPath(string path)
     {
-        FileSystemWatcher watcher = new FileSystemWatcher(path);
+        FileSystemWatcher watcher = new(path);
         watcher.NotifyFilter = NotifyFilters.Attributes
                                | NotifyFilters.CreationTime
                                // | NotifyFilters.DirectoryName
