@@ -1,36 +1,62 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 
 namespace GenericAssets.BinaryChunkFile;
 
 public class ChunkFileReader
 {
     private readonly BinaryReader _reader;
-
-    // private long _nextChunkOffset;
+    private long _nextChunkOffset;
 
     public ChunkFileReader(BinaryReader reader)
     {
         _reader = reader;
+        _nextChunkOffset = 0;
     }
 
-    public bool ValidateHeader(char magic1, char magic2, char magic3, char magic4)
+    public void ReadHeader(uint magic)
     {
-        try
+        if (_reader.ReadUInt32() != magic)
+            throw new InvalidDataException("Magic header is wrong");
+        
+        _nextChunkOffset = _reader.BaseStream.Position;
+    }
+
+    public BinaryReader ReadChunk(uint chunkId)
+    {
+        if (!_reader.BaseStream.CanSeek && _reader.BaseStream.Position != _nextChunkOffset)
+            throw new NotSupportedException();
+        
+        _reader.BaseStream.Seek(_nextChunkOffset, SeekOrigin.Begin);
+        
+        uint cid = _reader.ReadUInt32();
+        if (cid != chunkId)
+            throw new InvalidDataException($"Invalid chunk: {cid}, expected: {chunkId}");
+
+        int chunkSize = _reader.ReadInt32();
+        _nextChunkOffset = _reader.BaseStream.Position + chunkSize;
+        return new BinaryReader(new SubStreamReadOnly(_reader.BaseStream, chunkSize));
+    }
+
+    public bool TryReadChunk(out uint chunkId, out int chunkSize, [MaybeNullWhen(false)] out BinaryReader chunkReader)
+    {
+        if (_reader.BaseStream.Position == _reader.BaseStream.Length)
         {
-            return _reader.ReadByte() == magic1 && _reader.ReadByte() == magic2 && _reader.ReadByte() == magic3 && _reader.ReadByte() == magic4;
-        }
-        catch
-        {
+            chunkId = 0;
+            chunkSize = 0;
+            chunkReader = null;
             return false;
         }
+        
+        if (!_reader.BaseStream.CanSeek && _reader.BaseStream.Position != _nextChunkOffset)
+            throw new NotSupportedException();
+
+        chunkId = _reader.ReadUInt32();
+        chunkSize = _reader.ReadInt32();
+        _nextChunkOffset = _reader.BaseStream.Position + chunkSize;
+       
+        chunkReader = new BinaryReader(new SubStreamReadOnly(_reader.BaseStream, chunkSize));
+        return true;
     }
-
-
-    public bool TryReadChunkHeader(out ChunkHeader header)
-    {
-        header = default;
-        return false;
-    }
-
-    public void SkipChunk() { }
 }

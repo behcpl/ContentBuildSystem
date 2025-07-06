@@ -104,7 +104,7 @@ public class ContentBuilder
         AddItems(buildGroup, groupDesc, Path.GetFullPath(groupDesc.Path!, _projectPath), report);
         _groups.Add(buildGroup);
 
-        report?.BeginGroup(groupDesc.Description ?? "path", buildGroup.Items.Count);
+        IReport? subReport = report?.CreateGroup(groupDesc.Description ?? "path", buildGroup.Items.Count);
 
         Context context = new()
         {
@@ -130,11 +130,11 @@ public class ContentBuilder
             if (groupDesc.OutputPath != null)
                 context.ItemRelativePath = groupDesc.OutputPath;
 
-            report?.GroupItem(name);
+            subReport?.Advance();
             success = ProcessItem(context, item.Rule, report) && success;
         }
 
-        report?.EndGroup();
+        subReport?.Finish();
 
         return success;
     }

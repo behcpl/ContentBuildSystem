@@ -4,9 +4,10 @@ namespace ContentBuildSystem.Interfaces;
 
 public interface IReport
 {
-    void BeginGroup(string groupName, int expectedCount);
-    void GroupItem(string itemName);
-    void EndGroup();
+    IReport CreateGroup(string groupName, int expectedCount);
+    void Update(string groupName, int expectedCount);
+    void Advance();
+    void Finish();
 
     void Info(string message);
     void Warning(string message);

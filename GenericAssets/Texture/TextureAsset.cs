@@ -11,8 +11,7 @@ public class TextureAsset
     public int Count; // or depth in case of TEXTURE_3D
     public int MipMaps;
 
-    public TextureSurface[]? Surfaces; // [Count (* 6 for cubemaps) * MipMaps]
-    public TextureVolume[]? Volumes;   // [MipMaps]
+    public TextureBuffer[]? Buffers; // [Count (* 6 for cubemaps) * MipMaps]
 }
 
 public enum TextureAssetType
@@ -24,15 +23,7 @@ public enum TextureAssetType
     TEXTURE_3D,
 }
 
-public class TextureSurface
-{
-    public int Index;
-    public int MipLevel;
-    public int RowOffset;
-    public byte[]? Data;
-}
-
-public class TextureVolume
+public class TextureBuffer
 {
     public int Index;
     public int MipLevel;
@@ -130,9 +121,9 @@ public readonly struct TextureFormat
     private const uint _TYPE_MASK = 0xFF;
     private const uint _CHANNEL_MASK = 0x0F;
 
-    internal readonly uint Value;
+    public readonly uint Value;
 
-    internal TextureFormat(uint value)
+    public TextureFormat(uint value)
     {
         Value = value;
     }
@@ -184,5 +175,13 @@ public readonly struct TextureFormat
         };
 
         return new TextureFormat(_PACKED | packedFormat | (size << _SIZE_OFFSET));
+    }
+}
+
+public static class TextureAssetExtensions
+{
+    public static int BuffersCount(this TextureAsset textureAsset)
+    {
+        return textureAsset.Count * textureAsset.MipMaps * (textureAsset.Type is TextureAssetType.CUBE_MAP or TextureAssetType.CUBE_MAP_ARRAY ? 6 : 1);
     }
 }

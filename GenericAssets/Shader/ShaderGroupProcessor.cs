@@ -44,13 +44,12 @@ public class ShaderGroupProcessor : IItemProcessor
 
         ShaderGroupResource shaderGroupResource = new();
 
-        report?.BeginGroup(_context.ItemName, groupDescription.Programs.Count);
-
+        IReport? subReport = report?.CreateGroup(_context.ItemName, groupDescription.Programs.Count);
 
         bool result = true;
         foreach (KeyValuePair<string, ProgramDesc?> kv in groupDescription.Programs)
         {
-            report?.GroupItem(kv.Key);
+            subReport?.Advance();
 
             if (kv.Value == null)
                 continue;
@@ -63,7 +62,7 @@ public class ShaderGroupProcessor : IItemProcessor
             }
         }
 
-        report?.EndGroup();
+        subReport?.Finish();
 
         string outputDir = Path.Combine(_context.OutputPath, _context.ItemRelativePath);
         string outputPath = Path.Combine(outputDir, $"{_context.ItemName}.shaderlist");

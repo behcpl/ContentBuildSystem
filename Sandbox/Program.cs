@@ -1,16 +1,7 @@
 ﻿using System;
-using System.IO;
+using System.Threading;
 using ContentBuildSystem;
 using ContentBuildSystem.Interfaces;
-using ContentBuildSystem.Json;
-using ContentBuildSystem.Project;
-using ContentBuildSystem.Rules;
-using DefaultProcessors.CopyFile;
-using GenericAssets.Legacy.Atlases;
-using GenericAssets.Legacy.Fonts;
-using GenericAssets.Legacy.Textures;
-using GenericAssets.Localization;
-using GenericAssets.Shader;
 
 namespace Sandbox;
 
@@ -18,35 +9,111 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        string projDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Example"));
-        string projPath = Path.Combine(projDir, "example.asproj");
-        Console.WriteLine($"FOUND: {File.Exists(projPath)}  {Path.GetFullPath(projPath)}");
-        ProjectSerializer serializer = new();
-        ProjectDescription? project = serializer.Deserialize(projPath, null);
+        int top = Console.CursorTop;
+        int left = Console.CursorLeft;
+        Console.WriteLine($"START: ({left},{top})");
+        Console.WriteLine("NETX");
+        Console.WriteLine("NETX");
+        Console.WriteLine("NETX");
+        
+        ConsoleReport rep2 = new ConsoleReport();
 
-        RuleSerializer ruleSerializer = new();
+        rep2.Info("test info");
+        Thread.Sleep(200);
+        rep2.Warning("test warn");
+        Thread.Sleep(200);
+        rep2.Error("test error");
+        Thread.Sleep(200);
+        rep2.Info("test info 2");
+        Thread.Sleep(200);
 
-        ContentBuilderOptions options = ContentBuilderOptions.Build(projPath, null, null);
+        IReport subReport1 = rep2.CreateGroup("First group", 30);
+        Thread.Sleep(200);
 
-        string configuration = "windows-legacy"; //"windows-release";
-        RuleProvider ruleProvider = new(ruleSerializer);
+        for (int i = 0; i < 30; i++)
+        {
+            subReport1.Advance();
+            Thread.Sleep(100);
 
-        ruleProvider.AddProcessor("copy", new CopyFileProcessorFactory(), typeof(CopyFileProcessorSettings));
+            if (i == 4 || i == 12)
+                subReport1.Error("Extra error");
+            if (i == 7)
+                subReport1.Warning("Extra warning");
+        }
 
-        ruleProvider.AddProcessor("csv2json", new LangStringsProcessorFactory(), typeof(object));
-        ruleProvider.AddProcessor("shaders", new ShaderGroupProcessorFactory(), typeof(ShaderGroupProcessorSettings));
+        Thread.Sleep(200);
+        subReport1.Finish();
+        Thread.Sleep(200);
 
-        ruleProvider.AddProcessor("bmfont", new BitmapFontProcessorFactory(), typeof(BitmapFontProcessorSettings));
-        ruleProvider.AddProcessor("fontgen", new SdfFontProcessorFactory(true), typeof(SdfFontProcessorSettings));
-        ruleProvider.AddProcessor("texture", new TextureProcessorFactory(), typeof(TextureProcessorSettings));
-        ruleProvider.AddProcessor("atlas", new SpriteAtlasProcessorFactory(true), typeof(SpriteAtlasProcessorSettings));
+        rep2.Info("test info 3 ");
+        Thread.Sleep(200);
 
-        IReport report = new VerboseConsoleReport();
-        // IReport report = new ConsoleReport();
-        ContentBuilder builder = new(options, project!, ruleProvider, new BuildItemManifestSerializer());
+        IReport sub2 = rep2.CreateGroup("Second group", 30);
+        Thread th2 = new Thread(() =>
+        {
+            for (int i = 0; i < 30; i++)
+            {
+                sub2.Advance();
+                Thread.Sleep(100);
 
-        bool success = builder.PrepareConfiguration(configuration, report) && builder.BuildGroups(report);
-        report.Info($"DONE {success}");
+                if (i == 4 || i == 12)
+                    sub2.Warning("Extra warning from th2");
+            }
+
+            sub2.Finish();
+        });
+        th2.Start();
+
+        IReport sub3 = rep2.CreateGroup("Third group", 30);
+        Thread th3 = new Thread(() =>
+        {
+            for (int i = 0; i < 30; i++)
+            {
+                sub3.Advance();
+                Thread.Sleep(50);
+
+                if (i == 4 || i == 12)
+                    sub3.Info("Extra info from th3");
+            }
+
+            sub3.Finish();
+        });
+        th3.Start();
+
+        th2.Join();
+        th3.Join();
+
+        Console.ReadKey();
+
+        // string projDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Example"));
+        // string projPath = Path.Combine(projDir, "example.asproj");
+        // Console.WriteLine($"FOUND: {File.Exists(projPath)}  {Path.GetFullPath(projPath)}");
+        // ProjectSerializer serializer = new();
+        // ProjectDescription? project = serializer.Deserialize(projPath, null);
+        //
+        // RuleSerializer ruleSerializer = new();
+        //
+        // ContentBuilderOptions options = ContentBuilderOptions.Build(projPath, null, null);
+        //
+        // string configuration = "windows-legacy"; //"windows-release";
+        // RuleProvider ruleProvider = new(ruleSerializer);
+        //
+        // ruleProvider.AddProcessor("copy", new CopyFileProcessorFactory(), typeof(CopyFileProcessorSettings));
+        //
+        // ruleProvider.AddProcessor("csv2json", new LangStringsProcessorFactory(), typeof(object));
+        // ruleProvider.AddProcessor("shaders", new ShaderGroupProcessorFactory(), typeof(ShaderGroupProcessorSettings));
+        //
+        // ruleProvider.AddProcessor("bmfont", new BitmapFontProcessorFactory(), typeof(BitmapFontProcessorSettings));
+        // ruleProvider.AddProcessor("fontgen", new SdfFontProcessorFactory(true), typeof(SdfFontProcessorSettings));
+        // ruleProvider.AddProcessor("texture", new TextureProcessorFactory(), typeof(TextureProcessorSettings));
+        // ruleProvider.AddProcessor("atlas", new SpriteAtlasProcessorFactory(true), typeof(SpriteAtlasProcessorSettings));
+        //
+        // IReport report = new VerboseConsoleReport();
+        // // IReport report = new ConsoleReport();
+        // ContentBuilder builder = new(options, project!, ruleProvider, new BuildItemManifestSerializer());
+        //
+        // bool success = builder.PrepareConfiguration(configuration, report) && builder.BuildGroups(report);
+        // report.Info($"DONE {success}");
 
         // Console.ReadKey();
         // Stream fs = File.OpenRead(projPath);

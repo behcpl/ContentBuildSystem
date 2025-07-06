@@ -1,20 +1,34 @@
-﻿namespace GenericAssets.Texture;
+﻿using System;
+using GenericAssets.Legacy;
+
+namespace GenericAssets.Texture;
+
 
 public class ImageData
 {
     public int Width;
     public int Height;
-    // some format
-
-    public byte[] RawData;
+    public Color[] Pixels; // Width * Height * (RGBA)
 }
 
-public class ImageData2D
-{
-    public int Width;
-    public int Height;
+public static class ImageDataExtensions
+{ 
+    public static void Clear(ImageData image, Color color)
+    {
+        Array.Fill(image.Pixels, color);
+    }
 
-    public byte[] Data8;
-    public ushort[] Data16;
-    public float[] Data32f;
+    public static void FillRect()
+    {
+        
+    }
+    
+    // TODO: blitting/copying
+    public static void Blit()
+    {
+        
+    }
+    
+    // TODO: color conversion
+    // TODO: normal operators
 }

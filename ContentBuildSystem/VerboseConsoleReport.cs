@@ -5,20 +5,14 @@ namespace ContentBuildSystem;
 
 public class VerboseConsoleReport : IReport
 {
-    public void BeginGroup(string groupName, int expectedCount)
+    public IReport CreateGroup(string groupName, int expectedCount)
     {
-        Console.WriteLine($"GROUP: {groupName}[{expectedCount}]");
+        return this;
     }
 
-    public void GroupItem(string itemName)
-    {
-        Console.WriteLine($"ITEM: {itemName}");
-    }
-
-    public void EndGroup()
-    {
-        Console.WriteLine("END-GROUP");
-    }
+    public void Update(string groupName, int expectedCount) { }
+    public void Advance() { }
+    public void Finish() { }
 
     public void Info(string message)
     {

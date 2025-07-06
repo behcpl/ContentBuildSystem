@@ -38,36 +38,36 @@ public struct Color
 
     public static Color FromBytes(byte r, byte g, byte b, byte a)
     {
-        const float scale = 1.0f / 255.0f;
-        return new Color(r * scale, g * scale, b * scale, a * scale);
+        const float SCALE = 1.0f / 255.0f;
+        return new Color(r * SCALE, g * SCALE, b * SCALE, a * SCALE);
     }
 
     public uint ToPackedColor()
     {
-        uint r = unchecked((uint)Math.Round(Math.Clamp(R, 0.0f, 1.0f) * 255));
-        uint g = unchecked((uint)Math.Round(Math.Clamp(G, 0.0f, 1.0f) * 255));
-        uint b = unchecked((uint)Math.Round(Math.Clamp(B, 0.0f, 1.0f) * 255));
-        uint a = unchecked((uint)Math.Round(Math.Clamp(A, 0.0f, 1.0f) * 255));
+        uint r = unchecked((uint)MathF.Round(Math.Clamp(R, 0.0f, 1.0f) * 255));
+        uint g = unchecked((uint)MathF.Round(Math.Clamp(G, 0.0f, 1.0f) * 255));
+        uint b = unchecked((uint)MathF.Round(Math.Clamp(B, 0.0f, 1.0f) * 255));
+        uint a = unchecked((uint)MathF.Round(Math.Clamp(A, 0.0f, 1.0f) * 255));
         return r | (g << 8) | (b << 16) | (a << 24);
     }
 
     public (byte r, byte g, byte b, byte a) ToBytes()
     {
-        byte r = unchecked((byte)Math.Round(Math.Clamp(R, 0.0f, 1.0f) * 255));
-        byte g = unchecked((byte)Math.Round(Math.Clamp(G, 0.0f, 1.0f) * 255));
-        byte b = unchecked((byte)Math.Round(Math.Clamp(B, 0.0f, 1.0f) * 255));
-        byte a = unchecked((byte)Math.Round(Math.Clamp(A, 0.0f, 1.0f) * 255));
+        byte r = unchecked((byte)MathF.Round(Math.Clamp(R, 0.0f, 1.0f) * 255));
+        byte g = unchecked((byte)MathF.Round(Math.Clamp(G, 0.0f, 1.0f) * 255));
+        byte b = unchecked((byte)MathF.Round(Math.Clamp(B, 0.0f, 1.0f) * 255));
+        byte a = unchecked((byte)MathF.Round(Math.Clamp(A, 0.0f, 1.0f) * 255));
         return (r, g, b, a);
     }
 
     public Color ToLinearSpace()
     {
-        return new Color(G2L(R), G2L(G), G2L(B), A);
+        return new Color(GammaToLinear(R), GammaToLinear(G), GammaToLinear(B), A);
     }
 
     public Color ToGammaSpace()
     {
-        return new Color(L2G(R), L2G(G), L2G(B), A);
+        return new Color(LinearToGamma(R), LinearToGamma(G), LinearToGamma(B), A);
     }
 
     public Color ToAlphaPremultiplied()
@@ -75,13 +75,13 @@ public struct Color
         return new Color(R * A, G * A, B * A, A);
     }
 
-    private static float G2L(float v)
+    private static float GammaToLinear(float v)
     {
-        return v > 0.04045f ? (float)Math.Pow((v + 0.055) / 1.055, 2.2) : v / 12.92f;
+        return v > 0.04045f ? MathF.Pow((v + 0.055f) / 1.055f, 2.2f) : v / 12.92f;
     }
 
-    private static float L2G(float v)
+    private static float LinearToGamma(float v)
     {
-        return v > 0.0031308f ? 1.055f * (float)Math.Pow(v, 1 / 2.2) - 0.055f : v * 12.92f;
+        return v > 0.0031308f ? 1.055f * MathF.Pow(v, 1 / 2.2f) - 0.055f : v * 12.92f;
     }
 }

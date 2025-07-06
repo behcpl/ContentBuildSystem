@@ -9,9 +9,11 @@ using GenericAssets.Shader;
 namespace GenericAssets;
 
 [PluginEntrypoint]
-[PluginOption("DebugOutput", typeof(bool))]
+[PluginOption(_DEBUG_OUTPUT, typeof(bool))]
 public class PluginEntrypoint : IPlugin
 {
+    private const string _DEBUG_OUTPUT = "DebugOutput";
+    
     private readonly List<PluginDescriptor> _descriptors;
 
     public PluginEntrypoint()
@@ -21,7 +23,7 @@ public class PluginEntrypoint : IPlugin
 
     public bool Initialize(IServiceRepository serviceRepository, IReadOnlyDictionary<string, object>? options, IReport? report)
     {
-        bool debugOutput = options.GetValue("DebugOutput", false);
+        bool debugOutput = options.GetValue(_DEBUG_OUTPUT, false);
 
         // _descriptors.Add(new PluginDescriptor("texture", new ImageProcessorFactory(), typeof(object)));
         _descriptors.Add(new PluginDescriptor("csv2json", new LangStringsProcessorFactory(), typeof(object)));
