@@ -85,6 +85,8 @@ public class RuleProvider
             header.FileNamePattern ??= baseRule.Header.FileNamePattern;
             header.FolderPattern ??= baseRule.Header.FolderPattern;
         }
+        
+        // TODO: resolve extensions using IParameterResolver<string[]>
 
         // TODO: apply base settings from base rule
         _processors.TryGetValue(header.Handler!, out ProcessorDesc desc);

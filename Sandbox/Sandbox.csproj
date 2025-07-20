@@ -15,7 +15,7 @@
     <ItemGroup>
       <ProjectReference Include="..\ContentBuildSystem\ContentBuildSystem.csproj" />
       <ProjectReference Include="..\DefaultProcessors\DefaultProcessors.csproj" />
-      <ProjectReference Include="..\GenericAssets\GenericAssets.csproj" />
+      <ProjectReference Include="..\GenericGameAssetsProcessors\GenericGameAssetsProcessors.csproj" />
     </ItemGroup>
 
 </Project>

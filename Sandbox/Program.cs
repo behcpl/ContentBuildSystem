@@ -64,7 +64,7 @@ internal class Program
         });
         th2.Start();
 
-        IReport sub3 = rep2.CreateGroup("Third group", 30);
+        IReport sub3 = rep2.CreateGroup("Third group super long description lorem ipsum", 30);
         Thread th3 = new Thread(() =>
         {
             for (int i = 0; i < 30; i++)

@@ -6,13 +6,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentBuildSystem.CLI", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentBuildSystem", "ContentBuildSystem\ContentBuildSystem.csproj", "{1DAFB1CA-F34D-41B6-92C6-5B93C8B6290A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericAssets", "GenericAssets\GenericAssets.csproj", "{22647CCC-C8B3-4F49-A91F-474E8C4E93F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericGameAssetsProcessors", "GenericGameAssetsProcessors\GenericGameAssetsProcessors.csproj", "{22647CCC-C8B3-4F49-A91F-474E8C4E93F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DefaultProcessors", "DefaultProcessors\DefaultProcessors.csproj", "{D9A39B94-EEDB-4B11-BC86-7CA939BD5955}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentBuildSystem.Interfaces", "ContentBuildSystem.Interfaces\ContentBuildSystem.Interfaces.csproj", "{E6C7A7AC-8CB8-4864-8219-2DEA260F07EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericAssets.Tests", "GenericAssets.Tests\GenericAssets.Tests.csproj", "{F8CAC6E9-7ABA-4FAC-BE32-4EAA943457C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericGameAssets.Tests", "GenericGameAssets.Tests\GenericGameAssets.Tests.csproj", "{F8CAC6E9-7ABA-4FAC-BE32-4EAA943457C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericGameAssets", "GenericGameAssets\GenericGameAssets.csproj", "{1FBF49F8-F517-470B-B755-60B1FFD056A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,5 +50,9 @@ Global
 		{F8CAC6E9-7ABA-4FAC-BE32-4EAA943457C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8CAC6E9-7ABA-4FAC-BE32-4EAA943457C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8CAC6E9-7ABA-4FAC-BE32-4EAA943457C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FBF49F8-F517-470B-B755-60B1FFD056A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FBF49F8-F517-470B-B755-60B1FFD056A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FBF49F8-F517-470B-B755-60B1FFD056A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FBF49F8-F517-470B-B755-60B1FFD056A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

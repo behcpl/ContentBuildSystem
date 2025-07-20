@@ -92,7 +92,7 @@ public class ConsoleReport : IReport
 
         _interactiveRowStart = Console.CursorTop;
         _interactiveRowCount = 0;
-        
+
         Array.Fill(_empty, ' ');
     }
 
@@ -203,14 +203,14 @@ public class ConsoleReport : IReport
 
     private void PrintGroup(GroupDesc group)
     {
-        Console.Write(group.Name);
+        DrawName(group.Name);
         Console.CursorLeft = _BAR_POS;
         DrawBar(group.Processed, group.Total);
     }
 
     private void PrintGroupDone(GroupDesc group)
     {
-        Console.Write(group.Name);
+        DrawName(group.Name);
         Console.CursorLeft = _BAR_POS;
         if (group.Errors > 0)
         {
@@ -230,6 +230,11 @@ public class ConsoleReport : IReport
 
         Console.ResetColor();
         Console.WriteLine();
+    }
+
+    private void DrawName(string name)
+    {
+        Console.Write(name.Length < _BAR_POS ? name : $"{name.Substring(0, _BAR_POS - 4)}...");
     }
 
     private void DrawBar(int count, int total)
